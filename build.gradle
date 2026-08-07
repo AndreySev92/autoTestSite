@@ -46,10 +46,10 @@ dependencies {
     implementation 'org.seleniumhq.selenium:selenium-java:4.15.0'
 
     // REST Assured (для API)
-    testImplementation 'io.rest-assured:rest-assured:5.4.0'
+    implementation  'io.rest-assured:rest-assured:5.4.0'
 
     // Jackson для работы с JSON (нужен для REST Assured)
-    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+    implementation  'com.fasterxml.jackson.core:jackson-databind:2.15.3'
 
     // Selenium (для UI)
     testImplementation 'org.seleniumhq.selenium:selenium-java:4.17.0'
