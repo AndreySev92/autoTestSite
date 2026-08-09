@@ -12,12 +12,11 @@ public class Product {
     private String brand;
     private Category category;
 
-
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Category {
         private UserType usertype;
-        private String cat;
+        private String category;
     }
 
     @Data

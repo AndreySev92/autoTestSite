@@ -1,9 +1,10 @@
 package api;
 
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
 public class ProductServise extends BaseSpecification {
-    private static final String PRODUCTS_LIST = "/productSList";
+    private static final String PRODUCTS_LIST = "/productsList";
     private static final String BRANDS_LIST = "/brandsList";
     private static final String ADD_TO_CART = "/add_to_cart";
     private static final String VIEW_CART = "/view_cart";
