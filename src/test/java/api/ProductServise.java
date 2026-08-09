@@ -1,6 +1,5 @@
 package api;
 
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
 public class ProductServise extends BaseSpecification {

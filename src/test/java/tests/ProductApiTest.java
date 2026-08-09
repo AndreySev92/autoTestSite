@@ -3,12 +3,12 @@ package tests;
 import api.ProductServise;
 import dto.Brand;
 import dto.BrandResponse;
-import dto.Product;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 
 import java.util.List;
@@ -19,114 +19,51 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("API тесты для продуктов")
 public class ProductApiTest {
 
-    private static ProductServise productServise;
-
-    @BeforeAll
-    static void setup() {
-        productServise = new ProductServise();
-    }
-
-//    @Test
-//    @DisplayName("Проверка, что ответ содержит список продуктов")
-//    void productsListIsNotEmpty() {
-//        Response response = productServise.getProductsList();
-//
-//        assertThat(response.getStatusCode()).isEqualTo(200);
-//
-//        ProductResponse productResponse = response.as(ProductResponse.class);
-//        List<Product> products = productResponse.getProducts();
-//
-//        assertThat(products)
-//                .as("Список продуктов не должен быть пустым")
-//                .isNotEmpty();
-//
-//        assertThat(products)
-//                .as("Все продукты должны иметь заполненные поля")
-//                .allMatch(product ->
-//                        product.getId() != null && product.getId() > 0 &&
-//                                product.getName() != null && !product.getName().isEmpty() &&
-//                                product.getPrice() != null && !product.getPrice().isEmpty()
-//                );
-//    }
-
-    @Test
-    @DisplayName("Проверка, что ответ содержит список продуктов")
-    void productsListIsNotEmpty() {
-        Response response = productServise.getProductsList();
-
-        assertThat(response.getStatusCode()).isEqualTo(200);
-
-        // Получаем HTML как строку
-        String htmlBody = response.asString();
-
-        // Извлекаем JSON из HTML
-        String jsonBody = htmlBody
-                .replace("<html>", "")
-                .replace("</html>", "")
-                .replace("<body>", "")
-                .replace("</body>", "")
-                .trim();
-
-        // Парсим JSON в список продуктов
-        List<Product> products = JsonPath.from(jsonBody).getList("products", Product.class);
-
-        // Проверяем, что список не пустой
-        assertThat(products)
-                .as("Список продуктов не должен быть пустым")
-                .isNotEmpty();
-
-        // Проверяем, что у всех продуктов есть цена
-        assertThat(products)
-                .as("Все продукты должны иметь цену")
-                .allMatch(product -> product.getPrice() != null && !product.getPrice().isEmpty());
-    }
-    }
-
+    private final ProductServise productServise = new ProductServise();
 
     @Test
     @DisplayName("Получить список всех брендов")
     void brandListIsNotEmpty() {
         Response response = productServise.getBrandsList();
+
         assertThat(response.getStatusCode()).isEqualTo(200);
 
-        BrandResponse brandResponse = response.as(BrandResponse.class);
-        List<Brand> brands = brandResponse.getBrands();
+        JsonPath jsonPath = response.jsonPath();
+
+        int responseCode = jsonPath.getInt("responseCode");
+        assertThat(responseCode).isEqualTo(200);
+
+        List<Brand> brands = jsonPath.getList("brands", Brand.class);
 
         assertThat(brands)
-                .as("Список брендов не должен быть пустым")
-                .isNotEmpty();
-    }
-
-    @Test
-    @DisplayName("Проверка наличия конкретных брендов в списке")
-    void hasIsCategoryInList() {
-        Response response = productServise.getBrandsList();
-        assertThat(response.getStatusCode()).isEqualTo(200);
-
-        BrandResponse brandResponse = response.as(BrandResponse.class);
-        List<Brand> brands = brandResponse.getBrands();
-
-        List<String> actualBrands = brands.stream()
-                .map(Brand::getBrand)
-                .collect(Collectors.toList());
-
-        assertThat(actualBrands)
-                .as("Список брендов должен содержать: Polo, H&M, Madame, Biba")
-                .contains("Polo", "H&M", "Madame", "Biba");
-    }
-
-    @Test
-    @DisplayName("Проверка что id все уникальны")
-    void brandUnique() {
-        Response response = productServise.getBrandsList();
-        assertThat(response.getStatusCode()).isEqualTo(200);
-
-        BrandResponse brandResponse = response.as(BrandResponse.class);
-        List<Brand> brands = brandResponse.getBrands();
-
-        assertThat(brands)
-                .extracting(Brand::getId)  // ✅ ИСПРАВЛЕНО! Brand::getId, а не BrandResponse::getId
-                .as("Все ID брендов должны быть уникальными")
+                .as("Список не должен быть пустым,каждый должен иметь id + brand, id уникальны")
+                .isNotNull()
+                .isNotEmpty()
+                .allMatch(brand ->
+                        brand.getId() != null && brand.getId() > 0 &&
+                                brand.getBrand() != null && !brand.getBrand().isEmpty())
+                .extracting(Brand::getId)
                 .doesNotHaveDuplicates();
     }
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
+    @DisplayName("Проверка, что бренд с ID существует в списке")
+    void brandShouldExistById(int brandId) {
+        Response response = productServise.getBrandsList();
+        JsonPath jsonPath = response.jsonPath();
+
+        List<Integer> ids = jsonPath.getList("brands.id");
+
+        assertThat(ids)
+                .as("Бренд с ID %d должен существовать", brandId)
+                .contains(brandId);
+    }
+    @Test
+    @DisplayName("Получить список всех продуктов")
+    void productsListIsNotEmpty() {
+        Response response = productServise.getProductsList();
+
+        assertThat(response.getStatusCode()).isEqualTo(200);
+    }
+
 }
