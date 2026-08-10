@@ -11,6 +11,7 @@ public class ProductServise extends BaseSpecification {
     public static final String ADD_TO_CART = "/add_to_cart";
     public static final String VIEW_CART = "/view_cart";
     public static final String DELETE_CART = "/delete_cart";
+    public static final String LOGIN = "/verifyLogin";
 
     // Получить список продуктов
     public Response getProductsList(){
@@ -38,7 +39,19 @@ public class ProductServise extends BaseSpecification {
                 .formParam("email", email)
                 .formParam("password", password)
                 .when()
-                .post("/verifyLogin")
+                .post(LOGIN)
+                .then()
+                .extract()
+                .response();
+    }
+
+    public Response searchProduct(String search){
+        return given()
+                .baseUri(BASE_URL)
+                .contentType(ContentType.URLENC)
+                .formParam("search_product", search)
+                .when()
+                .get("/searchProduct")
                 .then()
                 .extract()
                 .response();

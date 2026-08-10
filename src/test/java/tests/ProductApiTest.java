@@ -3,11 +3,8 @@ package tests;
 import api.ProductServise;
 import dto.Brand;
 import dto.Product;
-import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,10 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 
 import java.util.List;
-import java.util.Map;
 
-import static api.BaseSpecification.BASE_URL;
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("API тесты для продуктов")
@@ -101,6 +95,15 @@ class ProductApiTest {
         assertThat(jsonPath.getString("message"))
                 .isEqualTo("User exists!");
     }
+
+    @Test
+    @DisplayName("Поиск товара по названию 'top' ")
+    void searchProductTest(){
+        Response response = productServise.searchProduct("top");
+    }
+
+
+
 
 
 
