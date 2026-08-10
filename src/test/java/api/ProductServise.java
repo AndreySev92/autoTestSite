@@ -1,13 +1,16 @@
 package api;
 
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
+import static io.restassured.RestAssured.given;
+
 public class ProductServise extends BaseSpecification {
-    private static final String PRODUCTS_LIST = "/productsList";
-    private static final String BRANDS_LIST = "/brandsList";
-    private static final String ADD_TO_CART = "/add_to_cart";
-    private static final String VIEW_CART = "/view_cart";
-    private static final String DELETE_CART = "/delete_cart";
+    public static final String PRODUCTS_LIST = "/productsList";
+    public static final String BRANDS_LIST = "/brandsList";
+    public static final String ADD_TO_CART = "/add_to_cart";
+    public static final String VIEW_CART = "/view_cart";
+    public static final String DELETE_CART = "/delete_cart";
 
     // Получить список продуктов
     public Response getProductsList(){
@@ -18,11 +21,24 @@ public class ProductServise extends BaseSpecification {
                 .extract()
                 .response();
     }
-
+    //получение списка брэндов
     public Response getBrandsList(){
         return getBaseSpec()
                 .when()
                 .get(BRANDS_LIST)
+                .then()
+                .extract()
+                .response();
+    }
+    //Вход в аккаунт
+    public Response login(String email, String password) {
+        return given()
+                .baseUri(BASE_URL)
+                .contentType(ContentType.URLENC)
+                .formParam("email", email)
+                .formParam("password", password)
+                .when()
+                .post("/verifyLogin")
                 .then()
                 .extract()
                 .response();
@@ -58,5 +74,7 @@ public class ProductServise extends BaseSpecification {
                 .extract()
                 .response();
     }
+
+
 
 }

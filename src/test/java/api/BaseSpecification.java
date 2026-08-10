@@ -6,7 +6,7 @@ import static io.restassured.RestAssured.given;
 
 public class BaseSpecification {
 
-    private static final String BASE_URL = "https://automationexercise.com/api";
+    public static final String BASE_URL = "https://automationexercise.com/api";
 
     protected RequestSpecification getBaseSpec() {
         return given()
