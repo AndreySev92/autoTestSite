@@ -52,38 +52,56 @@ public class ProductServise extends BaseSpecification {
 
     // Добавить продукт в корзину
     public Response addToCart(int productId) {
-        String csrfToken = getCsrfToken();
-        System.out.println("=== CSRF TOKEN ===");
-        System.out.println("Token: " + csrfToken);
-        System.out.println("==================");
+//        String csrfToken = getCsrfToken();
 
+        // 1. Отправляем запрос на добавление
         return given()
-                .config(RestAssured.config)
                 .baseUri("https://automationexercise.com")
-                .contentType(ContentType.JSON)
+                .contentType(ContentType.URLENC)
                 .accept(ContentType.JSON)
                 .header("Referer", "https://automationexercise.com/")
-                .header("X-CSRFToken", csrfToken)
-                .cookie("csrftoken", csrfToken)
-                .queryParam("product_id", productId)
+//                .header("X-CSRFToken", csrfToken)
+//                .cookie("csrftoken", csrfToken)
+//                .formParam("product_id", productId)
                 .when()
-                .post(ADD_TO_CART)
+                .get(ADD_TO_CART + "/" + productId)  // /add_to_cart/1
                 .then()
                 .extract()
                 .response();
+//
+//        // 2. Если редирект - идем по нему
+//        if (response.getStatusCode() == 302) {
+//            String location = response.getHeader("Location");
+//            System.out.println("Редирект на: " + location);
+//
+//            // 3. Переходим по ссылке редиректа
+//            return given()
+//                    .baseUri("https://automationexercise.com")
+//                    .when()
+//                    .get("/view_cart")
+//                    .then()
+//                    .extract()
+//                    .response();
+//        }
+//
+//        return response;
     }
 
-    private String getCsrfToken() {
-        Response response = given()
-                .baseUri("https://automationexercise.com")
-                .when()
-                .get("/")
-                .then()
-                .extract()
-                .response();
 
-        return response.getCookie("csrftoken");
-    }
+//    private String sessionId;
+//
+//    private String getCsrfToken() {
+//        Response response = given()
+//                .baseUri("https://automationexercise.com")
+//                .when()
+//                .get("/")
+//                .then()
+//                .extract()
+//                .response();
+//
+//        sessionId = response.getCookie("sessionid");
+//        return response.getCookie("csrftoken");
+//    }
 
     // Посмотреть корзину
     public Response viewCart() {

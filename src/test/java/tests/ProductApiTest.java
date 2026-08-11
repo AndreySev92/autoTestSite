@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
+import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("api")
@@ -56,6 +57,30 @@ class ProductApiTest {
                 .isEqualTo(loginTestData.getExpectedMessage());
     }
 
+    @Tag("validation")
+    @ParameterizedTest
+    @MethodSource("providers.LoginDataProvider#provideLoginData")
+    @DisplayName("1.1 Вход в аккаунт с невалидными данными (ошибки валидации)")
+    void loginValidationTest(LoginTestData loginTestData) {
+        if (loginTestData.getResultType() == LoginTestData.TestResultType.SUCCESS) {
+            return;
+        }
+        // GIVEN - данные из провайдера
+        // WHEN
+        Response response = productServise.login(loginTestData.getEmail(), loginTestData.getPassword());
+        // THEN
+        assertThat(response.getStatusCode())
+                .as("HTTP статус для '%s'", loginTestData.getEmail())
+                .isEqualTo(200);
+
+        JsonPath jsonPath = response.jsonPath();
+
+        assertThat(jsonPath.getMap(""))
+                .as("Проверка responseCode и message для '%s'", loginTestData.getEmail())
+                .extracting("responseCode", "message")
+                .containsExactly(404, loginTestData.getExpectedMessage());
+    }
+
     @Tag("success")
     @Test
     @DisplayName("2.Получить список всех брендов")
@@ -88,6 +113,7 @@ class ProductApiTest {
                 .doesNotHaveDuplicates();
     }
 
+    @Tag("success")
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
     @DisplayName("2.2 Проверка, что бренд с ID существует в списке")
@@ -134,47 +160,30 @@ class ProductApiTest {
                 .doesNotHaveDuplicates();
     }
 
+
     @Tag("success")
-    @Test
-    @DisplayName("4. Добавление продукта в корзину по ID")
-    void addToCartTest() {
-        // GIVEN
-        int productId = 1;
-        //WHEN
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
+    @DisplayName("4 Параметризованный.Добавление продукта в корзину по ID")
+    void addToCartParamTest(int productId) {
+        // GIVEN - данные из параметров
+        // WHEN
         Response response = productServise.addToCart(productId);
-
-        System.out.println("=== ДЕБАГ ===");
-        System.out.println("Status: " + response.getStatusCode());
-        System.out.println("Body: " + response.getBody().asString());
-        System.out.println("============");
-        // 👇 ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ
-        System.out.println("=== ДЕБАГ ДОБАВЛЕНИЯ В КОРЗИНУ ===");
-        System.out.println("Product ID: " + productId);
-        System.out.println("HTTP Status: " + response.getStatusCode());
-        System.out.println("Content-Type: " + response.getContentType());
-        System.out.println("Response Body: " + response.getBody().asString());
-        System.out.println("=====================================");
-
-        //THEN
+        // THEN
         assertThat(response.getStatusCode())
                 .as("HTTP статус должен быть 200")
                 .isEqualTo(200);
 
-        JsonPath jsonPath = response.jsonPath();
-
-        int responseCode = jsonPath.getInt("responseCode");
-        assertThat(responseCode)
-                .as("Внутренний responseCode должен быть 200")
-                .isEqualTo(200);
-
-        String message = jsonPath.getString("message");
-        assertThat(message)
-                .as("Сообщение должно быть 'Added To Cart'")
+        String body = response.getBody().asString();
+        assertThat(body)
+                .as("Тело ответа должно быть 'Added To Cart'")
                 .isEqualTo("Added To Cart");
     }
 
-    @Test
-    @DisplayName("Проверка, что товар с ID=1 существует")
+    @Tag("success")
+    @ParameterizedTest
+    @DisplayName("4.1 Проверка, что товар с ID=1 существует")
+    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
     void productShouldExist() {
         Response response = productServise.getProductsList();
         assertThat(response.getStatusCode())
@@ -191,22 +200,23 @@ class ProductApiTest {
         List<Product> products = response.jsonPath().getList("products", Product.class);
 
         assertThat(products)
-                .as("Товар с ID=1 должен существовать")
+                .as("Список продуктов не должен быть пустым и должен содержать товар с ID=1")
+                .isNotNull()
+                .isNotEmpty()
                 .anyMatch(product -> product.getId() == 1);
     }
 
-    @Tag("success")
+    @Tag("Validation")
     @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
-    @DisplayName("4.1 Параметризованный.Добавление продукта в корзину по ID")
-    void addToCartParamTest() {
-        // GIVEN
-        int productId = 1;
-        //WHEN
-        Response response = productServise.addToCart(productId);
-        //THEN
+    @ValueSource(ints = {999999, 0, -1})
+    @DisplayName("4.2 Проверка, что товар с несуществующим ID отсутствует")
+    void notIdpProduct(int nonExistentId){
+        // GIVEN - заведомо несуществующий ID
+        // WHEN
+        Response response = productServise.getProductsList();
+        // THEN
         assertThat(response.getStatusCode())
-                .as("HTTP статус должен быть 200")
+                .as("HTTP статус должен быть 403")
                 .isEqualTo(200);
 
         JsonPath jsonPath = response.jsonPath();
@@ -216,11 +226,18 @@ class ProductApiTest {
                 .as("Внутренний responseCode должен быть 200")
                 .isEqualTo(200);
 
-        String message = jsonPath.getString("message");
-        assertThat(message)
-                .as("Сообщение должно быть 'Added To Cart'")
-                .isEqualTo("Added To Cart");
+        List<Product> products = response.jsonPath().getList("products", Product.class);
+
+        assertThat(products)
+                .as("Товар с ID=%d не должен существовать", nonExistentId)
+                .isNotNull()
+                .noneMatch(product -> product.getId() == nonExistentId);
     }
+
+
+
+
+
 
 
 }
