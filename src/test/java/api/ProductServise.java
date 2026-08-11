@@ -1,7 +1,9 @@
 package api;
 
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+
 
 import static io.restassured.RestAssured.given;
 
@@ -12,6 +14,7 @@ public class ProductServise extends BaseSpecification {
     public static final String VIEW_CART = "/view_cart";
     public static final String DELETE_CART = "/delete_cart";
     public static final String LOGIN = "/verifyLogin";
+    private static final String SEARCH_PRODUCT = "/searchProduct";
 
     // Получить список продуктов
     public Response getProductsList(){
@@ -36,6 +39,7 @@ public class ProductServise extends BaseSpecification {
         return given()
                 .baseUri(BASE_URL)
                 .contentType(ContentType.URLENC)
+                .accept(ContentType.JSON)
                 .formParam("email", email)
                 .formParam("password", password)
                 .when()
@@ -45,27 +49,40 @@ public class ProductServise extends BaseSpecification {
                 .response();
     }
 
-    public Response searchProduct(String search){
+
+    // Добавить продукт в корзину
+    public Response addToCart(int productId) {
+        String csrfToken = getCsrfToken();
+        System.out.println("=== CSRF TOKEN ===");
+        System.out.println("Token: " + csrfToken);
+        System.out.println("==================");
+
         return given()
-                .baseUri(BASE_URL)
-                .contentType(ContentType.URLENC)
-                .formParam("search_product", search)
+                .config(RestAssured.config)
+                .baseUri("https://automationexercise.com")
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Referer", "https://automationexercise.com/")
+                .header("X-CSRFToken", csrfToken)
+                .cookie("csrftoken", csrfToken)
+                .queryParam("product_id", productId)
                 .when()
-                .get("/searchProduct")
+                .post(ADD_TO_CART)
                 .then()
                 .extract()
                 .response();
     }
 
-    // Добавить продукт в корзину
-    public Response addToCart(int productId) {
-        return getBaseSpec()
-                .queryParam("product_id", productId)
+    private String getCsrfToken() {
+        Response response = given()
+                .baseUri("https://automationexercise.com")
                 .when()
-                .post(ADD_TO_CART + "/" + productId)
+                .get("/")
                 .then()
                 .extract()
                 .response();
+
+        return response.getCookie("csrftoken");
     }
 
     // Посмотреть корзину
