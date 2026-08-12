@@ -14,7 +14,8 @@ public class ProductServise extends BaseSpecification {
     public static final String VIEW_CART = "/view_cart";
     public static final String DELETE_CART = "/delete_cart";
     public static final String LOGIN = "/verifyLogin";
-    private static final String SEARCH_PRODUCT = "/searchProduct";
+    private static final String GET_USER_DETAIL = "/getUserDetailByEmail";
+
 
     // Получить список продуктов
     public Response getProductsList(){
@@ -52,72 +53,40 @@ public class ProductServise extends BaseSpecification {
 
     // Добавить продукт в корзину
     public Response addToCart(int productId) {
-//        String csrfToken = getCsrfToken();
 
-        // 1. Отправляем запрос на добавление
         return given()
                 .baseUri("https://automationexercise.com")
                 .contentType(ContentType.URLENC)
                 .accept(ContentType.JSON)
                 .header("Referer", "https://automationexercise.com/")
-//                .header("X-CSRFToken", csrfToken)
-//                .cookie("csrftoken", csrfToken)
-//                .formParam("product_id", productId)
                 .when()
-                .get(ADD_TO_CART + "/" + productId)  // /add_to_cart/1
-                .then()
-                .extract()
-                .response();
-//
-//        // 2. Если редирект - идем по нему
-//        if (response.getStatusCode() == 302) {
-//            String location = response.getHeader("Location");
-//            System.out.println("Редирект на: " + location);
-//
-//            // 3. Переходим по ссылке редиректа
-//            return given()
-//                    .baseUri("https://automationexercise.com")
-//                    .when()
-//                    .get("/view_cart")
-//                    .then()
-//                    .extract()
-//                    .response();
-//        }
-//
-//        return response;
-    }
-
-
-//    private String sessionId;
-//
-//    private String getCsrfToken() {
-//        Response response = given()
-//                .baseUri("https://automationexercise.com")
-//                .when()
-//                .get("/")
-//                .then()
-//                .extract()
-//                .response();
-//
-//        sessionId = response.getCookie("sessionid");
-//        return response.getCookie("csrftoken");
-//    }
-
-    // Посмотреть корзину
-    public Response viewCart() {
-        return getBaseSpec()
-                .when()
-                .get(VIEW_CART)
+                .get(ADD_TO_CART + "/" + productId)
                 .then()
                 .extract()
                 .response();
     }
+
 
     // Удалить продукт из корзины
     public Response deleteFromCart(int productId) {
         return getBaseSpec()
+                .baseUri("https://automationexercise.com")
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Referer", "https://automationexercise.com/")
                 .when()
-                .delete(DELETE_CART + "/" + productId)
+                .get(DELETE_CART + "/" + productId)
+                .then()
+                .extract()
+                .response();
+    }
+
+    // Получение информации о пользователе
+    public Response getUserDetail(String email) {
+        return getBaseSpec()
+                .queryParam("email", email)
+                .when()
+                .get(GET_USER_DETAIL)
                 .then()
                 .extract()
                 .response();

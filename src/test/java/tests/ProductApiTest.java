@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,7 +85,7 @@ class ProductApiTest {
     @Tag("success")
     @Test
     @DisplayName("2.Получить список всех брендов")
-    void brandListIsNotEmpty() {
+    void brandListIsNotEmptyTest() {
         // GIVEN
         // WHEN
         Response response = productServise.getBrandsList();
@@ -117,7 +118,7 @@ class ProductApiTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
     @DisplayName("2.2 Проверка, что бренд с ID существует в списке")
-    void brandShouldExistById(int brandId) {
+    void brandShouldExistByIdTest(int brandId) {
         // GIVEN - ID из параметров
         // WHEN
         Response response = productServise.getBrandsList();
@@ -129,10 +130,11 @@ class ProductApiTest {
                 .as("Бренд с ID %d должен существовать", brandId)
                 .contains(brandId);
     }
+
     @Tag("success")
     @Test
     @DisplayName("3.Получить список всех продуктов")
-    void productsListIsNotEmpty() {
+    void productsListIsNotEmptyTest() {
         // GIVEN
         // WHEN
         Response response = productServise.getProductsList();
@@ -164,7 +166,7 @@ class ProductApiTest {
     @Tag("success")
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
-    @DisplayName("4 Параметризованный.Добавление продукта в корзину по ID")
+    @DisplayName("4 Параметризованный, добавление продукта в корзину по ID")
     void addToCartParamTest(int productId) {
         // GIVEN - данные из параметров
         // WHEN
@@ -184,7 +186,7 @@ class ProductApiTest {
     @ParameterizedTest
     @DisplayName("4.1 Проверка, что товар с ID=1 существует")
     @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
-    void productShouldExist() {
+    void productExistTest() {
         Response response = productServise.getProductsList();
         assertThat(response.getStatusCode())
                 .as("HTTP статус должен быть 200")
@@ -210,10 +212,11 @@ class ProductApiTest {
     @ParameterizedTest
     @ValueSource(ints = {999999, 0, -1})
     @DisplayName("4.2 Проверка, что товар с несуществующим ID отсутствует")
-    void notIdpProduct(int nonExistentId){
+    void notIdpProductTest(int nonExistentId) {
         // GIVEN - заведомо несуществующий ID
         // WHEN
         Response response = productServise.getProductsList();
+
         // THEN
         assertThat(response.getStatusCode())
                 .as("HTTP статус должен быть 403")
@@ -235,8 +238,58 @@ class ProductApiTest {
     }
 
 
+    @Tag("success")
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4, 5})
+    @DisplayName("5. Добавление и удаление товара из корзины")
+    void addAndDeleteProductTest(int productId) {
+        //GIVEN
+        // WHEN - добавляем товар
+        Response addResponse = productServise.addToCart(productId);
+        // THEN - проверяем добавление
+        assertThat(addResponse.getStatusCode())
+                .as("HTTP статус при добавлении товара ID=%d", productId)
+                .isEqualTo(200);
+        assertThat(addResponse.getBody().asString())
+                .as("Тело ответа при добавлении товара ID=%d", productId)
+                .isEqualTo("Added To Cart");
+        // WHEN - удаляем товар
+
+        Response deleteResponse = productServise.deleteFromCart(productId);
+
+        // THEN - проверяем удаление
+        assertThat(deleteResponse.getStatusCode())
+                .as("HTTP статус при удалении товара ID=%d", productId)
+                .isEqualTo(200);
+        assertThat(deleteResponse.getBody().asString())
+                .as("Тело ответа при удалении товара ID=%d", productId)
+                .isEqualTo("Cart removed");
+    }
+
+    @Tag("Validation")
+    @ParameterizedTest
+    @ValueSource(ints = {999999, 0, -1})
+    @DisplayName("5.1 Удаление несуществующего товара из корзины")
+    void deleteNonExistentProductTest(int productId) {
+        // GIVEN - несуществующий ID из параметров
+        // WHEN
+        Response response = productServise.deleteFromCart(productId);
+
+        // THEN
+        if (productId == -1) {
+
+            assertThat(response.getStatusCode())
+                    .as("HTTP статус для ID=%d должен быть 404", productId)
+                    .isEqualTo(404);
+        } else {
+            String body = response.getBody().asString();
+            assertThat(body)
+                    .as("Тело ответа для ID=%d должен быть 200", productId)
+                    .isEqualTo("Cart removed");
 
 
+        }
+    }
 
 
 
