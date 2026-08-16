@@ -13,7 +13,7 @@ public class BaseSpecification {
                 .baseUri(BASE_URL)
                     .baseUri(BASE_URL)
                     .header("User-Agent", "PostmanRuntime/7.53.0")
-                    .header("Accept", "*/*")
+                    .header("Accept", "application/json")
                     .header("Accept-Encoding", "gzip, deflate, br")
                     .header("Connection", "keep-alive")
                     .header("Cache-Control", "no-cache")

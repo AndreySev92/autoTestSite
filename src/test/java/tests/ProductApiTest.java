@@ -5,6 +5,7 @@ import dto.Brand;
 import dto.BrandResponseDto;
 import dto.LoginResponseDto;
 import dto.Product;
+import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
@@ -108,7 +109,7 @@ class ProductApiTest {
 
     @Test
     @Tag("validationvalidation")
-    @DisplayName("2.1 Каждый бренд имеет название  и уникальный Id")
+    @DisplayName("2.2 Каждый бренд имеет название  и уникальный Id")
     void brandList_Id_Unique() {
         // GIVEN
         // WHEN
@@ -131,16 +132,18 @@ class ProductApiTest {
 
     @Test
     @Tag("validation")
-    @DisplayName("2.2 Название брендов должны быть уникальным ")
+    @DisplayName("2.3 Название брендов должны быть уникальными ")
     void brandList_brand_Unique() {
         // GIVEN
         // WHEN
         Response response = productServise.getBrandsList();
+        //THEN
         BrandResponseDto responseDto = response.as(BrandResponseDto.class);
+
         List<Brand> brands = responseDto.getBrands();
         //THEN
         assertThat(brands)
-                .as("Название брендов должны быть уникальным")
+                .as("Название брендов должны быть уникальными")
                 .extracting(Brand::getBrand)
                 .doesNotHaveDuplicates();
 
