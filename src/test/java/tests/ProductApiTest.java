@@ -2,6 +2,7 @@ package tests;
 
 import api.ProductServise;
 import dto.Brand;
+import dto.BrandResponseDto;
 import dto.LoginResponseDto;
 import dto.Product;
 import io.restassured.path.json.JsonPath;
@@ -76,37 +77,82 @@ class ProductApiTest {
 //                .containsExactly(404, loginTestData.getExpectedMessage());
 //    }
 
-    @Tag("success")
     @Test
-    @DisplayName("2.Получить список всех брендов")
-    void brandListIsNotEmptyTest() {
+    @Tag("success")
+    @DisplayName("2.Получение списка брендов, возвращает статус 200")
+    void brandList_Return200() {
         // GIVEN
         // WHEN
         Response response = productServise.getBrandsList();
         // THEN
-        assertThat(response.getStatusCode())
-                .as("HTTP статус должен быть 200")
-                .isEqualTo(200);
+        assertThat(response.getStatusCode()).isEqualTo(200);
 
-        JsonPath jsonPath = response.jsonPath();
+    }
 
-        int responseCode = jsonPath.getInt("responseCode");
-        assertThat(responseCode)
-                .as("Внутренний responseCode должен быть 200")
-                .isEqualTo(200);
-
-        List<Brand> brands = response.jsonPath().getList("brands", Brand.class);
-
-        assertThat(brands)
-                .as("Проверка на null и пустой ответ,должен иметь id + brand, уникальный id")
-                .isNotNull()
+    @Test
+    @Tag("success")
+    @DisplayName("2.1 Список брендов не пустой ")
+    void brandList_IsNotEmpty() {
+        // GIVEN
+        // WHEN
+        Response response = productServise.getBrandsList();
+        BrandResponseDto responseDto = response.as(BrandResponseDto.class);
+        //THEN
+        assertThat(responseDto.getResponseCode()).isEqualTo(200);
+        assertThat(responseDto.getBrands())
+                .as("Список брендов должен содержать элементы")
                 .isNotEmpty()
-                .allMatch(brand ->
+                .isNotNull();
+    }
+
+
+    @Test
+    @Tag("validationvalidation")
+    @DisplayName("2.1 Каждый бренд имеет название  и уникальный Id")
+    void brandList_Id_Unique() {
+        // GIVEN
+        // WHEN
+        Response response = productServise.getBrandsList();
+        BrandResponseDto responseDto = response.as(BrandResponseDto.class);
+        List<Brand> brands = responseDto.getBrands();
+        //THEN
+        assertThat(brands)
+                .as("Все бренды должны иметь положительный ID и непустое название")
+                .allMatch(brand->
                         brand.getId() != null && brand.getId() > 0 &&
-                                brand.getBrand() != null && !brand.getBrand().isEmpty())
+                        brand.getBrand() != null && brand.getBrand().isEmpty()
+                        );
+        assertThat(brands)
+                .as("Id должен быть уникальным")
                 .extracting(Brand::getId)
                 .doesNotHaveDuplicates();
+
     }
+
+    @Test
+    @Tag("validation")
+    @DisplayName("2.2 Название брендов должны быть уникальным ")
+    void brandList_brand_Unique() {
+        // GIVEN
+        // WHEN
+        Response response = productServise.getBrandsList();
+        BrandResponseDto responseDto = response.as(BrandResponseDto.class);
+        List<Brand> brands = responseDto.getBrands();
+        //THEN
+        assertThat(brands)
+                .as("Название брендов должны быть уникальным")
+                .extracting(Brand::getBrand)
+                .doesNotHaveDuplicates();
+
+    }
+
+
+
+
+
+
+
+
 
     @Tag("success")
     @ParameterizedTest

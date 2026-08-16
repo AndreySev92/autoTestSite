@@ -38,15 +38,8 @@ public class ProductServise extends BaseSpecification {
     }
     //Вход в аккаунт
     public Response login(String email, String password) {
-
-        LoginRequestDto loginRequest = LoginRequestDto.builder()
-                .email(email)
-                .password(password)
-                .build();
-
         return getBaseSpec()
                 .contentType(ContentType.URLENC)
-                .accept(ContentType.JSON)
                 .formParam("email", email)
                 .formParam("password", password)
                 .when()

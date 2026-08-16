@@ -11,7 +11,13 @@ public class BaseSpecification {
         protected RequestSpecification getBaseSpec() {
             return given()
                 .baseUri(BASE_URL)
-                .contentType(io.restassured.http.ContentType.JSON)
-                .accept(io.restassured.http.ContentType.JSON);
-    }
+                    .baseUri(BASE_URL)
+                    .header("User-Agent", "PostmanRuntime/7.53.0")
+                    .header("Accept", "*/*")
+                    .header("Accept-Encoding", "gzip, deflate, br")
+                    .header("Connection", "keep-alive")
+                    .header("Cache-Control", "no-cache")
+                .log().all();
+
+        }
 }
