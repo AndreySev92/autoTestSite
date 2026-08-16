@@ -1,12 +1,15 @@
 package dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
 import lombok.Data;
-import java.util.List;
 
 @Data
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProductResponse {
-    private Integer responseCode;
-    private List<Product> products;
+public class LoginResponseDto {
+
+    private int responseCode;
+    private String message;
+
 }

@@ -1,5 +1,6 @@
 package api;
 
+import dto.LoginRequestDto;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -37,8 +38,13 @@ public class ProductServise extends BaseSpecification {
     }
     //Вход в аккаунт
     public Response login(String email, String password) {
-        return given()
-                .baseUri(BASE_URL)
+
+        LoginRequestDto loginRequest = LoginRequestDto.builder()
+                .email(email)
+                .password(password)
+                .build();
+
+        return getBaseSpec()
                 .contentType(ContentType.URLENC)
                 .accept(ContentType.JSON)
                 .formParam("email", email)

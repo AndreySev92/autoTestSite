@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BrandResponse {
+public class ProductResponseDto {
     private Integer responseCode;
-    private List<Brand> brands;
+    private List<Product> products;
 }

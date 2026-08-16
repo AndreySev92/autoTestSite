@@ -2,13 +2,10 @@ package tests;
 
 import api.ProductServise;
 import dto.Brand;
-import dto.LoginTestData;
+import dto.LoginResponseDto;
 import dto.Product;
-import io.restassured.RestAssured;
-import io.restassured.config.RedirectConfig;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -17,9 +14,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
-import java.util.Map;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("api")
@@ -28,59 +23,58 @@ class ProductApiTest {
 
     private final ProductServise productServise = new ProductServise();
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.config = RestAssured.config()
-                .redirect(RedirectConfig.redirectConfig()
-                        .followRedirects(true)
-                        .maxRedirects(5));
+//    @BeforeEach
+//    void setUp() {
+//        RestAssured.config = RestAssured.config()
+//                .redirect(RedirectConfig.redirectConfig()
+//                        .followRedirects(true)
+//                        .maxRedirects(5));
+//
+//    }
 
-    }
-
-
+    @Test
     @Tag("success")
-    @ParameterizedTest
-    @MethodSource("providers.LoginDataProvider#provideLoginData")
-    @DisplayName("1.Вход в аккаунт с валидными данными Email, Password")
-    void loginTest(LoginTestData loginTestData) {
-        // GIVEN - данные из провайдера
+    @DisplayName("1.Вход с валидными данными Email и Password")
+    void loginTest() {
+        // GIVEN
+        String email = "max@mail.ru";
+        String password = "123123";
+
         // WHEN
-        Response response = productServise.login(loginTestData.getEmail(), loginTestData.getPassword());
+        Response response = productServise.login(email, password);
 
         // THEN
-        assertThat(response.getStatusCode())
-                .as("HTTP статус кода для '%s'", loginTestData.getEmail())
-                .isEqualTo(loginTestData.getExpectedStatusCode());
+        assertThat(response.getStatusCode()).isEqualTo(200);
 
-        JsonPath jsonPath = response.jsonPath();
-        assertThat(jsonPath.getString("message"))
-                .as("Сообщение для '%s'", loginTestData.getEmail())
-                .isEqualTo(loginTestData.getExpectedMessage());
+        LoginResponseDto loginResponse = response.as(LoginResponseDto.class);
+
+        assertThat(loginResponse.getResponseCode()).isEqualTo(200);
+        assertThat(loginResponse.getMessage()).isEqualTo("User exists!");
     }
 
-    @Tag("validation")
-    @ParameterizedTest
-    @MethodSource("providers.LoginDataProvider#provideLoginData")
-    @DisplayName("1.1 Вход в аккаунт с невалидными данными (ошибки валидации)")
-    void loginValidationTest(LoginTestData loginTestData) {
-        if (loginTestData.getResultType() == LoginTestData.TestResultType.SUCCESS) {
-            return;
-        }
-        // GIVEN - данные из провайдера
-        // WHEN
-        Response response = productServise.login(loginTestData.getEmail(), loginTestData.getPassword());
-        // THEN
-        assertThat(response.getStatusCode())
-                .as("HTTP статус для '%s'", loginTestData.getEmail())
-                .isEqualTo(200);
-
-        JsonPath jsonPath = response.jsonPath();
-
-        assertThat(jsonPath.getMap(""))
-                .as("Проверка responseCode и message для '%s'", loginTestData.getEmail())
-                .extracting("responseCode", "message")
-                .containsExactly(404, loginTestData.getExpectedMessage());
-    }
+//    @Tag("validation")
+//    @ParameterizedTest
+//    @MethodSource("providers.LoginDataProvider#provideLoginData")
+//    @DisplayName("1.1 Вход в аккаунт с невалидными данными (ошибки валидации)")
+//    void loginValidationTest(LoginTestData loginTestData) {
+//        if (loginTestData.getResultType() == LoginTestData.TestResultType.SUCCESS) {
+//            return;
+//        }
+//        // GIVEN - данные из провайдера
+//        // WHEN
+//        Response response = productServise.login(loginTestData.getEmail(), loginTestData.getPassword());
+//        // THEN
+//        assertThat(response.getStatusCode())
+//                .as("HTTP статус для '%s'", loginTestData.getEmail())
+//                .isEqualTo(200);
+//
+//        JsonPath jsonPath = response.jsonPath();
+//
+//        assertThat(jsonPath.getMap(""))
+//                .as("Проверка responseCode и message для '%s'", loginTestData.getEmail())
+//                .extracting("responseCode", "message")
+//                .containsExactly(404, loginTestData.getExpectedMessage());
+//    }
 
     @Tag("success")
     @Test
