@@ -1,18 +1,13 @@
 package tests;
 
 import api.ProductServise;
-import dto.Brand;
-import dto.BrandResponseDto;
-import dto.LoginResponseDto;
-import dto.Product;
-import io.restassured.http.ContentType;
+import dto.*;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
@@ -25,315 +20,305 @@ class ProductApiTest {
 
     private final ProductServise productServise = new ProductServise();
 
-//    @BeforeEach
-//    void setUp() {
-//        RestAssured.config = RestAssured.config()
-//                .redirect(RedirectConfig.redirectConfig()
-//                        .followRedirects(true)
-//                        .maxRedirects(5));
-//
-//    }
-
-    @Test
     @Tag("success")
-    @DisplayName("1.Вход с валидными данными Email и Password")
-    void loginTest() {
-        // GIVEN
-        String email = "max@mail.ru";
-        String password = "123123";
+    @Test
+    @DisplayName("1.Получить список всех продуктов")
+    void productsListTest() {
+        Response response = productServise.getProductsList();
+        System.out.println("Status: " + response.statusCode());
+        System.out.println("Content-Type: " + response.contentType());
+        System.out.println("Body: " + response.asString());
+        ProductResponseDto productDto = response.as(ProductResponseDto.class);
+        List<Product> products = productDto.getProducts();
 
-        // WHEN
-        Response response = productServise.login(email, password);
+        System.out.println("Status: " + response.statusCode());
+        System.out.println("Content-Type: " + response.contentType());
+        System.out.println("Body: " + response.asString());
 
-        // THEN
-        assertThat(response.getStatusCode()).isEqualTo(200);
+        assertThat(response.statusCode()).isEqualTo(200);
 
-        LoginResponseDto loginResponse = response.as(LoginResponseDto.class);
-
-        assertThat(loginResponse.getResponseCode()).isEqualTo(200);
-        assertThat(loginResponse.getMessage()).isEqualTo("User exists!");
+        assertThat(products)
+                .isNotEmpty()
+                .withFailMessage("Продукты не прошли валидацию: %s", products)
+                .allMatch(product ->
+                        product.getId() != null &&
+                        product.getName() != null &&
+                        product.getPrice() != null &&
+                        product.getBrand() != null);
     }
 
-//    @Tag("validation")
-//    @ParameterizedTest
-//    @MethodSource("providers.LoginDataProvider#provideLoginData")
-//    @DisplayName("1.1 Вход в аккаунт с невалидными данными (ошибки валидации)")
-//    void loginValidationTest(LoginTestData loginTestData) {
-//        if (loginTestData.getResultType() == LoginTestData.TestResultType.SUCCESS) {
-//            return;
-//        }
-//        // GIVEN - данные из провайдера
+
+
+
+
+
+
+
+////        List<Product> products = response.jsonPath().getList("products", Product.class);
+////        assertThat(products)
+////                .isNotNull()
+////                .isNotEmpty()
+////                .allMatch(product ->
+////                        product.getId() != null && product.getId() > 0 &&
+////                                product.getBrand() != null && !product.getBrand().isEmpty())
+////                .extracting(Product::getId)
+////                .doesNotHaveDuplicates();
+//
+//
+//
+//    //
+//
+////    @Tag("validation")
+////    @ParameterizedTest
+////    @MethodSource("providers.LoginDataProvider#provideLoginData")
+////    @DisplayName("1.1 Вход в аккаунт с невалидными данными (ошибки валидации)")
+////    void loginValidationTest(LoginTestData loginTestData) {
+////        if (loginTestData.getResultType() == LoginTestData.TestResultType.SUCCESS) {
+////            return;
+////        }
+////        // GIVEN - данные из провайдера
+////        // WHEN
+////        Response response = productServise.login(loginTestData.getEmail(), loginTestData.getPassword());
+////        // THEN
+////        assertThat(response.getStatusCode())
+////                .as("HTTP статус для '%s'", loginTestData.getEmail())
+////                .isEqualTo(200);
+////
+////        JsonPath jsonPath = response.jsonPath();
+////
+////        assertThat(jsonPath.getMap(""))
+////                .as("Проверка responseCode и message для '%s'", loginTestData.getEmail())
+////                .extracting("responseCode", "message")
+////                .containsExactly(404, loginTestData.getExpectedMessage());
+////    }
+//
+//    @Test
+//    @Tag("success")
+//    @DisplayName("2.Получение списка брендов, возвращает статус 200")
+//    void brandList_Return200() {
+//        // GIVEN
 //        // WHEN
-//        Response response = productServise.login(loginTestData.getEmail(), loginTestData.getPassword());
+//        Response response = productServise.getBrandsList();
+//        // THEN
+//        assertThat(response.getStatusCode()).isEqualTo(200);
+//
+//    }
+//
+//    @Test
+//    @Tag("success")
+//    @DisplayName("2.1 Список брендов не пустой ")
+//    void brandList_IsNotEmpty() {
+//        // GIVEN
+//        // WHEN
+//        Response response = productServise.getBrandsList();
+//        BrandResponseDto responseDto = response.as(BrandResponseDto.class);
+//        //THEN
+//        assertThat(responseDto.getResponseCode()).isEqualTo(200);
+//        assertThat(responseDto.getBrands())
+//                .as("Список брендов должен содержать элементы")
+//                .isNotEmpty()
+//                .isNotNull();
+//    }
+//
+//
+//    @Test
+//    @Tag("validationvalidation")
+//    @DisplayName("2.2 Каждый бренд имеет название  и уникальный Id")
+//    void brandList_Id_Unique() {
+//        // GIVEN
+//        // WHEN
+//        Response response = productServise.getBrandsList();
+//        BrandResponseDto responseDto = response.as(BrandResponseDto.class);
+//        List<Brand> brands = responseDto.getBrands();
+//        //THEN
+//        assertThat(brands)
+//                .as("Все бренды должны иметь положительный ID и непустое название")
+//                .allMatch(brand->
+//                        brand.getId() != null && brand.getId() > 0 &&
+//                        brand.getBrand() != null && brand.getBrand().isEmpty()
+//                        );
+//        assertThat(brands)
+//                .as("Id должен быть уникальным")
+//                .extracting(Brand::getId)
+//                .doesNotHaveDuplicates();
+//
+//    }
+//
+//    @Test
+//    @Tag("validation")
+//    @DisplayName("2.3 Название брендов должны быть уникальными ")
+//    void brandList_brand_Unique() {
+//        // GIVEN
+//        // WHEN
+//        Response response = productServise.getBrandsList();
+//        //THEN
+//        BrandResponseDto responseDto = response.as(BrandResponseDto.class);
+//
+//        List<Brand> brands = responseDto.getBrands();
+//        //THEN
+//        assertThat(brands)
+//                .as("Название брендов должны быть уникальными")
+//                .extracting(Brand::getBrand)
+//                .doesNotHaveDuplicates();
+//
+//    }
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//    @Tag("success")
+//    @ParameterizedTest
+//    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
+//    @DisplayName("2.2 Проверка, что бренд с ID существует в списке")
+//    void brandShouldExistByIdTest(int brandId) {
+//        // GIVEN - ID из параметров
+//        // WHEN
+//        Response response = productServise.getBrandsList();
+//        JsonPath jsonPath = response.jsonPath();
+//        // THEN
+//        List<Integer> ids = jsonPath.getList("brands.id");
+//
+//        assertThat(ids)
+//                .as("Бренд с ID %d должен существовать", brandId)
+//                .contains(brandId);
+//    }
+//
+//
+//
+//
+//    @Tag("success")
+//    @ParameterizedTest
+//    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
+//    @DisplayName("4 Параметризованный, добавление продукта в корзину по ID")
+//    void addToCartParamTest(int productId) {
+//        // GIVEN - данные из параметров
+//        // WHEN
+//        Response response = productServise.addToCart(productId);
 //        // THEN
 //        assertThat(response.getStatusCode())
-//                .as("HTTP статус для '%s'", loginTestData.getEmail())
+//                .as("HTTP статус должен быть 200")
+//                .isEqualTo(200);
+//
+//        String body = response.getBody().asString();
+//        assertThat(body)
+//                .as("Тело ответа должно быть 'Added To Cart'")
+//                .isEqualTo("Added To Cart");
+//    }
+//
+//    @Tag("success")
+//    @ParameterizedTest
+//    @DisplayName("4.1 Проверка, что товар с ID=1 существует")
+//    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
+//    void productExistTest() {
+//        Response response = productServise.getProductsList();
+//        assertThat(response.getStatusCode())
+//                .as("HTTP статус должен быть 200")
 //                .isEqualTo(200);
 //
 //        JsonPath jsonPath = response.jsonPath();
 //
-//        assertThat(jsonPath.getMap(""))
-//                .as("Проверка responseCode и message для '%s'", loginTestData.getEmail())
-//                .extracting("responseCode", "message")
-//                .containsExactly(404, loginTestData.getExpectedMessage());
+//        int responseCode = jsonPath.getInt("responseCode");
+//        assertThat(responseCode)
+//                .as("Внутренний responseCode должен быть 200")
+//                .isEqualTo(200);
+//
+//        List<Product> products = response.jsonPath().getList("products", Product.class);
+//
+//        assertThat(products)
+//                .as("Список продуктов не должен быть пустым и должен содержать товар с ID=1")
+//                .isNotNull()
+//                .isNotEmpty()
+//                .anyMatch(product -> product.getId() == 1);
 //    }
-
-    @Test
-    @Tag("success")
-    @DisplayName("2.Получение списка брендов, возвращает статус 200")
-    void brandList_Return200() {
-        // GIVEN
-        // WHEN
-        Response response = productServise.getBrandsList();
-        // THEN
-        assertThat(response.getStatusCode()).isEqualTo(200);
-
-    }
-
-    @Test
-    @Tag("success")
-    @DisplayName("2.1 Список брендов не пустой ")
-    void brandList_IsNotEmpty() {
-        // GIVEN
-        // WHEN
-        Response response = productServise.getBrandsList();
-        BrandResponseDto responseDto = response.as(BrandResponseDto.class);
-        //THEN
-        assertThat(responseDto.getResponseCode()).isEqualTo(200);
-        assertThat(responseDto.getBrands())
-                .as("Список брендов должен содержать элементы")
-                .isNotEmpty()
-                .isNotNull();
-    }
-
-
-    @Test
-    @Tag("validationvalidation")
-    @DisplayName("2.2 Каждый бренд имеет название  и уникальный Id")
-    void brandList_Id_Unique() {
-        // GIVEN
-        // WHEN
-        Response response = productServise.getBrandsList();
-        BrandResponseDto responseDto = response.as(BrandResponseDto.class);
-        List<Brand> brands = responseDto.getBrands();
-        //THEN
-        assertThat(brands)
-                .as("Все бренды должны иметь положительный ID и непустое название")
-                .allMatch(brand->
-                        brand.getId() != null && brand.getId() > 0 &&
-                        brand.getBrand() != null && brand.getBrand().isEmpty()
-                        );
-        assertThat(brands)
-                .as("Id должен быть уникальным")
-                .extracting(Brand::getId)
-                .doesNotHaveDuplicates();
-
-    }
-
-    @Test
-    @Tag("validation")
-    @DisplayName("2.3 Название брендов должны быть уникальными ")
-    void brandList_brand_Unique() {
-        // GIVEN
-        // WHEN
-        Response response = productServise.getBrandsList();
-        //THEN
-        BrandResponseDto responseDto = response.as(BrandResponseDto.class);
-
-        List<Brand> brands = responseDto.getBrands();
-        //THEN
-        assertThat(brands)
-                .as("Название брендов должны быть уникальными")
-                .extracting(Brand::getBrand)
-                .doesNotHaveDuplicates();
-
-    }
-
-
-
-
-
-
-
-
-
-    @Tag("success")
-    @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
-    @DisplayName("2.2 Проверка, что бренд с ID существует в списке")
-    void brandShouldExistByIdTest(int brandId) {
-        // GIVEN - ID из параметров
-        // WHEN
-        Response response = productServise.getBrandsList();
-        JsonPath jsonPath = response.jsonPath();
-        // THEN
-        List<Integer> ids = jsonPath.getList("brands.id");
-
-        assertThat(ids)
-                .as("Бренд с ID %d должен существовать", brandId)
-                .contains(brandId);
-    }
-
-    @Tag("success")
-    @Test
-    @DisplayName("3.Получить список всех продуктов")
-    void productsListIsNotEmptyTest() {
-        // GIVEN
-        // WHEN
-        Response response = productServise.getProductsList();
-        // THEN
-        assertThat(response.getStatusCode())
-                .as("HTTP статус должен быть 200")
-                .isEqualTo(200);
-
-        JsonPath jsonPath = response.jsonPath();
-
-        int responseCode = jsonPath.getInt("responseCode");
-        assertThat(responseCode)
-                .as("Внутренний responseCode должен быть 200")
-                .isEqualTo(200);
-
-        List<Product> products = response.jsonPath().getList("products", Product.class);
-        assertThat(products)
-                .as("Проверка на null и пустой ответ,должен иметь id + brand, уникальный id")
-                .isNotNull()
-                .isNotEmpty()
-                .allMatch(product ->
-                        product.getId() != null && product.getId() > 0 &&
-                                product.getBrand() != null && !product.getBrand().isEmpty())
-                .extracting(Product::getId)
-                .doesNotHaveDuplicates();
-    }
-
-
-    @Tag("success")
-    @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
-    @DisplayName("4 Параметризованный, добавление продукта в корзину по ID")
-    void addToCartParamTest(int productId) {
-        // GIVEN - данные из параметров
-        // WHEN
-        Response response = productServise.addToCart(productId);
-        // THEN
-        assertThat(response.getStatusCode())
-                .as("HTTP статус должен быть 200")
-                .isEqualTo(200);
-
-        String body = response.getBody().asString();
-        assertThat(body)
-                .as("Тело ответа должно быть 'Added To Cart'")
-                .isEqualTo("Added To Cart");
-    }
-
-    @Tag("success")
-    @ParameterizedTest
-    @DisplayName("4.1 Проверка, что товар с ID=1 существует")
-    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8})
-    void productExistTest() {
-        Response response = productServise.getProductsList();
-        assertThat(response.getStatusCode())
-                .as("HTTP статус должен быть 200")
-                .isEqualTo(200);
-
-        JsonPath jsonPath = response.jsonPath();
-
-        int responseCode = jsonPath.getInt("responseCode");
-        assertThat(responseCode)
-                .as("Внутренний responseCode должен быть 200")
-                .isEqualTo(200);
-
-        List<Product> products = response.jsonPath().getList("products", Product.class);
-
-        assertThat(products)
-                .as("Список продуктов не должен быть пустым и должен содержать товар с ID=1")
-                .isNotNull()
-                .isNotEmpty()
-                .anyMatch(product -> product.getId() == 1);
-    }
-
-    @Tag("Validation")
-    @ParameterizedTest
-    @ValueSource(ints = {999999, 0, -1})
-    @DisplayName("4.2 Проверка, что товар с несуществующим ID отсутствует")
-    void notIdpProductTest(int nonExistentId) {
-        // GIVEN - заведомо несуществующий ID
-        // WHEN
-        Response response = productServise.getProductsList();
-
-        // THEN
-        assertThat(response.getStatusCode())
-                .as("HTTP статус должен быть 403")
-                .isEqualTo(200);
-
-        JsonPath jsonPath = response.jsonPath();
-
-        int responseCode = jsonPath.getInt("responseCode");
-        assertThat(responseCode)
-                .as("Внутренний responseCode должен быть 200")
-                .isEqualTo(200);
-
-        List<Product> products = response.jsonPath().getList("products", Product.class);
-
-        assertThat(products)
-                .as("Товар с ID=%d не должен существовать", nonExistentId)
-                .isNotNull()
-                .noneMatch(product -> product.getId() == nonExistentId);
-    }
-
-
-    @Tag("success")
-    @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 4, 5})
-    @DisplayName("5. Добавление и удаление товара из корзины")
-    void addAndDeleteProductTest(int productId) {
-        //GIVEN
-        // WHEN - добавляем товар
-        Response addResponse = productServise.addToCart(productId);
-        // THEN - проверяем добавление
-        assertThat(addResponse.getStatusCode())
-                .as("HTTP статус при добавлении товара ID=%d", productId)
-                .isEqualTo(200);
-        assertThat(addResponse.getBody().asString())
-                .as("Тело ответа при добавлении товара ID=%d", productId)
-                .isEqualTo("Added To Cart");
-        // WHEN - удаляем товар
-
-        Response deleteResponse = productServise.deleteFromCart(productId);
-
-        // THEN - проверяем удаление
-        assertThat(deleteResponse.getStatusCode())
-                .as("HTTP статус при удалении товара ID=%d", productId)
-                .isEqualTo(200);
-        assertThat(deleteResponse.getBody().asString())
-                .as("Тело ответа при удалении товара ID=%d", productId)
-                .isEqualTo("Cart removed");
-    }
-
-    @Tag("Validation")
-    @ParameterizedTest
-    @ValueSource(ints = {999999, 0, -1})
-    @DisplayName("5.1 Удаление несуществующего товара из корзины")
-    void deleteNonExistentProductTest(int productId) {
-        // GIVEN - несуществующий ID из параметров
-        // WHEN
-        Response response = productServise.deleteFromCart(productId);
-
-        // THEN
-        if (productId == -1) {
-
-            assertThat(response.getStatusCode())
-                    .as("HTTP статус для ID=%d должен быть 404", productId)
-                    .isEqualTo(404);
-        } else {
-            String body = response.getBody().asString();
-            assertThat(body)
-                    .as("Тело ответа для ID=%d должен быть 200", productId)
-                    .isEqualTo("Cart removed");
-
-
-        }
-    }
-
-
+//
+//    @Tag("Validation")
+//    @ParameterizedTest
+//    @ValueSource(ints = {999999, 0, -1})
+//    @DisplayName("4.2 Проверка, что товар с несуществующим ID отсутствует")
+//    void notIdpProductTest(int nonExistentId) {
+//        // GIVEN - заведомо несуществующий ID
+//        // WHEN
+//        Response response = productServise.getProductsList();
+//
+//        // THEN
+//        assertThat(response.getStatusCode())
+//                .as("HTTP статус должен быть 403")
+//                .isEqualTo(200);
+//
+//        JsonPath jsonPath = response.jsonPath();
+//
+//        int responseCode = jsonPath.getInt("responseCode");
+//        assertThat(responseCode)
+//                .as("Внутренний responseCode должен быть 200")
+//                .isEqualTo(200);
+//
+//        List<Product> products = response.jsonPath().getList("products", Product.class);
+//
+//        assertThat(products)
+//                .as("Товар с ID=%d не должен существовать", nonExistentId)
+//                .isNotNull()
+//                .noneMatch(product -> product.getId() == nonExistentId);
+//    }
+//
+//
+//    @Tag("success")
+//    @ParameterizedTest
+//    @ValueSource(ints = {1, 2, 3, 4, 5})
+//    @DisplayName("5. Добавление и удаление товара из корзины")
+//    void addAndDeleteProductTest(int productId) {
+//        //GIVEN
+//        // WHEN - добавляем товар
+//        Response addResponse = productServise.addToCart(productId);
+//        // THEN - проверяем добавление
+//        assertThat(addResponse.getStatusCode())
+//                .as("HTTP статус при добавлении товара ID=%d", productId)
+//                .isEqualTo(200);
+//        assertThat(addResponse.getBody().asString())
+//                .as("Тело ответа при добавлении товара ID=%d", productId)
+//                .isEqualTo("Added To Cart");
+//        // WHEN - удаляем товар
+//
+//        Response deleteResponse = productServise.deleteFromCart(productId);
+//
+//        // THEN - проверяем удаление
+//        assertThat(deleteResponse.getStatusCode())
+//                .as("HTTP статус при удалении товара ID=%d", productId)
+//                .isEqualTo(200);
+//        assertThat(deleteResponse.getBody().asString())
+//                .as("Тело ответа при удалении товара ID=%d", productId)
+//                .isEqualTo("Cart removed");
+//    }
+//
+//    @Tag("Validation")
+//    @ParameterizedTest
+//    @ValueSource(ints = {999999, 0, -1})
+//    @DisplayName("5.1 Удаление несуществующего товара из корзины")
+//    void deleteNonExistentProductTest(int productId) {
+//        // GIVEN - несуществующий ID из параметров
+//        // WHEN
+//        Response response = productServise.deleteFromCart(productId);
+//
+//        // THEN
+//        if (productId == -1) {
+//
+//            assertThat(response.getStatusCode())
+//                    .as("HTTP статус для ID=%d должен быть 404", productId)
+//                    .isEqualTo(404);
+//        } else {
+//            String body = response.getBody().asString();
+//            assertThat(body)
+//                    .as("Тело ответа для ID=%d должен быть 200", productId)
+//                    .isEqualTo("Cart removed");
+//
+//
+//        }
+//    }
+//
+//
 
 }

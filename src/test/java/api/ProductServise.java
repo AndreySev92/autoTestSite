@@ -1,7 +1,5 @@
 package api;
 
-import dto.LoginRequestDto;
-import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
@@ -9,7 +7,7 @@ import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 
 public class ProductServise extends BaseSpecification {
-    public static final String PRODUCTS_LIST = "/productsList";
+    public static final String PRODUCTS_LIST = "/api/productsList";
     public static final String BRANDS_LIST = "/brandsList";
     public static final String ADD_TO_CART = "/add_to_cart";
     public static final String VIEW_CART = "/view_cart";
@@ -21,48 +19,27 @@ public class ProductServise extends BaseSpecification {
     // Получить список продуктов
     public Response getProductsList(){
         return getBaseSpec()
-                .when()
-                .get(PRODUCTS_LIST)
-                .then()
-                .extract()
-                .response();
+                .get(PRODUCTS_LIST);
+
     }
     //получение списка брэндов
     public Response getBrandsList(){
         return getBaseSpec()
-                .when()
-                .get(BRANDS_LIST)
-                .then()
-                .extract()
-                .response();
+                .get(BRANDS_LIST);
     }
     //Вход в аккаунт
-    public Response login(String email, String password) {
-        return getBaseSpec()
-                .contentType(ContentType.URLENC)
-                .formParam("email", email)
-                .formParam("password", password)
-                .when()
-                .post(LOGIN)
-                .then()
-                .extract()
-                .response();
-    }
+//    public Response login(UserCred request) {
+//        return getBaseSpec()
+//                .post(LOGIN);
+//    }
 
 
     // Добавить продукт в корзину
     public Response addToCart(int productId) {
 
         return given()
-                .baseUri("https://automationexercise.com")
-                .contentType(ContentType.URLENC)
-                .accept(ContentType.JSON)
-                .header("Referer", "https://automationexercise.com/")
-                .when()
                 .get(ADD_TO_CART + "/" + productId)
-                .then()
-                .extract()
-                .response();
+                ;
     }
 
 

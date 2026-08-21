@@ -9,4 +9,5 @@ import java.util.List;
 public class ProductResponseDto {
     private Integer responseCode;
     private List<Product> products;
+
 }
