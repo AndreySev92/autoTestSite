@@ -1,18 +1,16 @@
-package tests;
+package api.tests;
 
-import api.ProductServise;
+import api.service.ProductServise;
 import dto.*;
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
+import testdata.expected.ProductTestData;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static testdata.expected.ProductTestData.expectedResponseStatus200;
 
 @Tag("api")
 @DisplayName("API тесты для продуктов")
@@ -22,29 +20,34 @@ class ProductApiTest {
 
     @Tag("success")
     @Test
-    @DisplayName("1.Получить список всех продуктов")
+    @DisplayName("1 - GET /products - возвращает список продуктов с заполненными полями id, name, price, brand")
     void productsListTest() {
-        Response response = productServise.getProductsList();
-        System.out.println("Status: " + response.statusCode());
-        System.out.println("Content-Type: " + response.contentType());
-        System.out.println("Body: " + response.asString());
+        Response response = productServise.getProducts();
+        Product expectedProduct = ProductTestData.blueTop();
+
         ProductResponseDto productDto = response.as(ProductResponseDto.class);
         List<Product> products = productDto.getProducts();
 
-        System.out.println("Status: " + response.statusCode());
-        System.out.println("Content-Type: " + response.contentType());
-        System.out.println("Body: " + response.asString());
-
-        assertThat(response.statusCode()).isEqualTo(200);
-
+        assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
+        assertThat(productDto.getResponseCode()).isEqualTo(expectedResponseStatus200);
         assertThat(products)
                 .isNotEmpty()
-                .withFailMessage("Продукты не прошли валидацию: %s", products)
+                .withFailMessage("Все продукты должны иметь id, name, price и brand. Нарушители: %s", products)
                 .allMatch(product ->
                         product.getId() != null &&
                         product.getName() != null &&
                         product.getPrice() != null &&
-                        product.getBrand() != null);
+                        product.getBrand() != null)
+                .satisfies(list -> {
+                    assertThat(list)
+                            .allMatch(product ->
+                                    product.getId().equals(expectedProduct.getId()) &&
+                                    product.getName().equals(expectedProduct.getName()) &&
+                                    product.getPrice().equals(expectedProduct.getPrice()) &&
+                                    product.getBrand().equals(expectedProduct.getBrand())
+                            );
+                });
+
     }
 
 
@@ -54,44 +57,6 @@ class ProductApiTest {
 
 
 
-////        List<Product> products = response.jsonPath().getList("products", Product.class);
-////        assertThat(products)
-////                .isNotNull()
-////                .isNotEmpty()
-////                .allMatch(product ->
-////                        product.getId() != null && product.getId() > 0 &&
-////                                product.getBrand() != null && !product.getBrand().isEmpty())
-////                .extracting(Product::getId)
-////                .doesNotHaveDuplicates();
-//
-//
-//
-//    //
-//
-////    @Tag("validation")
-////    @ParameterizedTest
-////    @MethodSource("providers.LoginDataProvider#provideLoginData")
-////    @DisplayName("1.1 Вход в аккаунт с невалидными данными (ошибки валидации)")
-////    void loginValidationTest(LoginTestData loginTestData) {
-////        if (loginTestData.getResultType() == LoginTestData.TestResultType.SUCCESS) {
-////            return;
-////        }
-////        // GIVEN - данные из провайдера
-////        // WHEN
-////        Response response = productServise.login(loginTestData.getEmail(), loginTestData.getPassword());
-////        // THEN
-////        assertThat(response.getStatusCode())
-////                .as("HTTP статус для '%s'", loginTestData.getEmail())
-////                .isEqualTo(200);
-////
-////        JsonPath jsonPath = response.jsonPath();
-////
-////        assertThat(jsonPath.getMap(""))
-////                .as("Проверка responseCode и message для '%s'", loginTestData.getEmail())
-////                .extracting("responseCode", "message")
-////                .containsExactly(404, loginTestData.getExpectedMessage());
-////    }
-//
 //    @Test
 //    @Tag("success")
 //    @DisplayName("2.Получение списка брендов, возвращает статус 200")

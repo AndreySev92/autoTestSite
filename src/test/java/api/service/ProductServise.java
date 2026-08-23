@@ -1,6 +1,8 @@
-package api;
+package api.service;
 
+import config.BaseSpecification;
 import io.restassured.http.ContentType;
+import io.restassured.parsing.Parser;
 import io.restassured.response.Response;
 
 
@@ -15,13 +17,22 @@ public class ProductServise extends BaseSpecification {
     public static final String LOGIN = "/verifyLogin";
     private static final String GET_USER_DETAIL = "/getUserDetailByEmail";
 
-
     // Получить список продуктов
-    public Response getProductsList(){
+    public Response getProducts(){
         return getBaseSpec()
-                .get(PRODUCTS_LIST);
+                .get(PRODUCTS_LIST)
+                .then()
+                .parser("text/html", Parser.JSON)
+                .extract().response();
 
     }
+
+//    public Response Product(ProductRequestDto request){
+//        return getBaseSpec()
+//                .body(request)
+//                .get(CREATE_PRODUCT);
+//    }
+
     //получение списка брэндов
     public Response getBrandsList(){
         return getBaseSpec()
