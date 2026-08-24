@@ -6,11 +6,9 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import testdata.expected.ProductTestData;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static testdata.expected.ProductTestData.expectedResponseStatus200;
 
 @Tag("api")
 @DisplayName("API тесты для продуктов")
@@ -20,35 +18,43 @@ class ProductApiTest {
 
     @Tag("success")
     @Test
-    @DisplayName("1 - GET /products - возвращает список продуктов с заполненными полями id, name, price, brand")
-    void productsListTest() {
-        Response response = productServise.getProducts();
-        Product expectedProduct = ProductTestData.blueTop();
+    @DisplayName("1 - GET /products - возвращает список продуктов с id, name, price, brand + проверка статуса 200")
+    void productsListContainsIdNamePriceBrandTest() {
+        int expectedResponseStatus200 = 200;
+        String[] expectedFields = {"id", "name", "price", "brand"};
 
+        Response response = productServise.getProducts();
         ProductResponseDto productDto = response.as(ProductResponseDto.class);
-        List<Product> products = productDto.getProducts();
+        List<Product> productsList = productDto.getProducts();
 
         assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
         assertThat(productDto.getResponseCode()).isEqualTo(expectedResponseStatus200);
-        assertThat(products)
+        assertThat(productsList)
                 .isNotEmpty()
-                .withFailMessage("Все продукты должны иметь id, name, price и brand. Нарушители: %s", products)
-                .allMatch(product ->
-                        product.getId() != null &&
-                        product.getName() != null &&
-                        product.getPrice() != null &&
-                        product.getBrand() != null)
-                .satisfies(list -> {
-                    assertThat(list)
-                            .allMatch(product ->
-                                    product.getId().equals(expectedProduct.getId()) &&
-                                    product.getName().equals(expectedProduct.getName()) &&
-                                    product.getPrice().equals(expectedProduct.getPrice()) &&
-                                    product.getBrand().equals(expectedProduct.getBrand())
-                            );
-                });
+                .isNotNull()
+                .allSatisfy(product ->
+                        assertThat(product)
+                                .extracting(expectedFields)
+                                .doesNotContainNull()
+                );
 
     }
+
+    @Tag("success")
+    @Test
+    @DisplayName("1.1 - GET /products - список содержит продукт 'Blue Top' с корректными данными")
+    void productsListContainsBlueTopProductTest(){
+        Product blueTop = new Product(1, "Blue Top", "Rs. 500", "Polo", "Women", "Tops");
+
+        Response response = productServise.getProducts();
+        ProductResponseDto productDto = response.as(ProductResponseDto.class);
+        List<Product> products = productDto.getProducts();
+
+        assertThat(products)
+                .contains(blueTop);
+    }
+
+//    void
 
 
 

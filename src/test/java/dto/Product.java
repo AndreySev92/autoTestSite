@@ -26,6 +26,10 @@ public class Product {
         this.category.setCategory(categoryName);
     }
 
+    public Product() {
+
+    }
+
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Category {
