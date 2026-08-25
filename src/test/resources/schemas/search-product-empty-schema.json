@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "responseCode": {
+      "type": "integer"
+    },
+    "products": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 0
+    }
+  },
+  "required": ["responseCode", "products"]
+}

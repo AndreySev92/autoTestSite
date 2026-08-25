@@ -46,11 +46,7 @@ public class ProductServise extends BaseSpecification {
                 .parser("text/html", Parser.JSON)
                 .extract().response();
     }
-    //Вход в аккаунт
-//    public Response login(UserCred request) {
-//        return getBaseSpec()
-//                .post(LOGIN);
-//    }
+
 
 
     // Добавить продукт в корзину

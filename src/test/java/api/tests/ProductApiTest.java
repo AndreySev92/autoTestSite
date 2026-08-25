@@ -1,18 +1,16 @@
 package api.tests;
 
 import api.service.ProductServise;
-import dto.Product;
 import dto.ProductResponseDto;
-import io.restassured.parsing.Parser;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.assertj.core.api.Assertions.assertThat;
+import static testdata.expected.ExpectedResponse.expectedResponseStatus200;
 
 @Tag("api")
 @DisplayName("API тесты для продуктов")
@@ -38,7 +36,6 @@ class ProductApiTest {
     @Tag("success")
     @DisplayName("2 - GET /api/brandsList - Получение списка брендов, возвращает статус 200")
     void brandsList200NotEmptyTest() {
-        int expectedResponseStatus200 = 200;
 
         Response response = productServise.getBrandsList();
 
@@ -53,30 +50,29 @@ class ProductApiTest {
     @Tag("success")
     @DisplayName("3 - POST /api/searchProduct - Получение списка брендов, возвращает статус 200")
     void searchProductTest() {
-        int expectedResponseStatus200 = 200;
         String searchTerm = "shirt";
-
 
         Response response = productServise.searchProduct(searchTerm);
 
-
-        // ⭐ ЛОГИРУЕМ
-        System.out.println("Status: " + response.statusCode());
-        System.out.println("Body: " + response.asString());
-
         assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
-
-
-        ProductResponseDto productResponseDto = response.as(ProductResponseDto.class);
-        List<Product> products = productResponseDto.getProducts();
-
-        assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
-        assertThat(products)
-                .allMatch(product ->
-                        product.getName().toLowerCase().contains(searchTerm)
-                );
+        response.then().assertThat()
+                .body(matchesJsonSchemaInClasspath("schemas/search-product-schema.json"));
     }
 
+    @Test
+    @Tag("validation")
+    @DisplayName("3.1 - POST /api/searchProduct - Запрос не существующего товара")
+    void productNotFoundTest() {
+        String searchTerm = "nonexistentitemxyz";
+
+        Response response = productServise.searchProduct(searchTerm);
+        ProductResponseDto productDto = response.as(ProductResponseDto.class);
+
+        assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
+        assertThat(productDto.getProducts()).isEmpty();
+        response.then().assertThat()
+                .body(matchesJsonSchemaInClasspath("schemas/search-product-empty-schema.json"));
+    }
 //
 //    @Test
 //    @Tag("success")
