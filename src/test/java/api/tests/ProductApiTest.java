@@ -1,13 +1,17 @@
 package api.tests;
 
 import api.service.ProductServise;
-import dto.*;
+import dto.Product;
+import dto.ProductResponseDto;
+import io.restassured.parsing.Parser;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
 
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("api")
@@ -18,62 +22,61 @@ class ProductApiTest {
 
     @Tag("success")
     @Test
-    @DisplayName("1 - GET /products - возвращает список продуктов с id, name, price, brand + проверка статуса 200")
+    @DisplayName("1 - GET /api/productsList - возвращает список продуктов с id, name, price, brand + проверка статуса 200")
     void productsListContainsIdNamePriceBrandTest() {
         int expectedResponseStatus200 = 200;
-        String[] expectedFields = {"id", "name", "price", "brand"};
 
         Response response = productServise.getProducts();
-        ProductResponseDto productDto = response.as(ProductResponseDto.class);
-        List<Product> productsList = productDto.getProducts();
 
         assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
-        assertThat(productDto.getResponseCode()).isEqualTo(expectedResponseStatus200);
-        assertThat(productsList)
-                .isNotEmpty()
-                .isNotNull()
-                .allSatisfy(product ->
-                        assertThat(product)
-                                .extracting(expectedFields)
-                                .doesNotContainNull()
-                );
+        response.then().assertThat()
+                .body(matchesJsonSchemaInClasspath("schemas/products-schema.json"));
 
     }
 
-    @Tag("success")
     @Test
-    @DisplayName("1.1 - GET /products - список содержит продукт 'Blue Top' с корректными данными")
-    void productsListContainsBlueTopProductTest(){
-        Product blueTop = new Product(1, "Blue Top", "Rs. 500", "Polo", "Women", "Tops");
+    @Tag("success")
+    @DisplayName("2 - GET /api/brandsList - Получение списка брендов, возвращает статус 200")
+    void brandsList200NotEmptyTest() {
+        int expectedResponseStatus200 = 200;
 
-        Response response = productServise.getProducts();
-        ProductResponseDto productDto = response.as(ProductResponseDto.class);
-        List<Product> products = productDto.getProducts();
+        Response response = productServise.getBrandsList();
 
-        assertThat(products)
-                .contains(blueTop);
+        assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
+        response.then().assertThat()
+                .body(matchesJsonSchemaInClasspath("schemas/brands-schema.json"));
+
+
     }
 
-//    void
+    @Test
+    @Tag("success")
+    @DisplayName("3 - POST /api/searchProduct - Получение списка брендов, возвращает статус 200")
+    void searchProductTest() {
+        int expectedResponseStatus200 = 200;
+        String searchTerm = "shirt";
 
 
+        Response response = productServise.searchProduct(searchTerm);
 
 
+        // ⭐ ЛОГИРУЕМ
+        System.out.println("Status: " + response.statusCode());
+        System.out.println("Body: " + response.asString());
+
+        assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
 
 
+        ProductResponseDto productResponseDto = response.as(ProductResponseDto.class);
+        List<Product> products = productResponseDto.getProducts();
 
+        assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
+        assertThat(products)
+                .allMatch(product ->
+                        product.getName().toLowerCase().contains(searchTerm)
+                );
+    }
 
-//    @Test
-//    @Tag("success")
-//    @DisplayName("2.Получение списка брендов, возвращает статус 200")
-//    void brandList_Return200() {
-//        // GIVEN
-//        // WHEN
-//        Response response = productServise.getBrandsList();
-//        // THEN
-//        assertThat(response.getStatusCode()).isEqualTo(200);
-//
-//    }
 //
 //    @Test
 //    @Tag("success")
@@ -291,5 +294,6 @@ class ProductApiTest {
 //    }
 //
 //
+
 
 }

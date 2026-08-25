@@ -10,7 +10,8 @@ import static io.restassured.RestAssured.given;
 
 public class ProductServise extends BaseSpecification {
     public static final String PRODUCTS_LIST = "/api/productsList";
-    public static final String BRANDS_LIST = "/brandsList";
+    public static final String BRANDS_LIST = "/api/brandsList";
+    public static final String SEARCH = "/api/searchProduct";
     public static final String ADD_TO_CART = "/add_to_cart";
     public static final String VIEW_CART = "/view_cart";
     public static final String DELETE_CART = "/delete_cart";
@@ -27,16 +28,23 @@ public class ProductServise extends BaseSpecification {
 
     }
 
-//    public Response Product(ProductRequestDto request){
-//        return getBaseSpec()
-//                .body(request)
-//                .get(CREATE_PRODUCT);
-//    }
-
     //получение списка брэндов
     public Response getBrandsList(){
         return getBaseSpec()
-                .get(BRANDS_LIST);
+                .get(BRANDS_LIST)
+                .then()
+                .parser("text/html", Parser.JSON)
+                .extract().response();
+    }
+
+    public Response searchProduct(String search) {
+        return getBaseSpec()
+                .contentType("application/x-www-form-urlencoded")
+                .formParam("search_product", search)
+                .post(SEARCH)
+                .then()
+                .parser("text/html", Parser.JSON)
+                .extract().response();
     }
     //Вход в аккаунт
 //    public Response login(UserCred request) {

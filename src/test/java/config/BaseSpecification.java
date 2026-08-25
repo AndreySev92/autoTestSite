@@ -11,7 +11,6 @@ public class BaseSpecification {
         protected RequestSpecification getBaseSpec() {
             return given()
                 .baseUri(BASE_URL)
-                .contentType("application/json")
                 .accept("application/json");
         }
 }

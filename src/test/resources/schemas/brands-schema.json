@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "responseCode": {"type": "integer"},
+    "brands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "brand": {"type": "string"}
+        },
+        "required": ["id", "brand"]
+      }
+    }
+  },
+  "required": ["responseCode", "brands"]
+}

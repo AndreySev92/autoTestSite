@@ -36,6 +36,9 @@ ext {
 }
 
 dependencies {
+
+    testImplementation 'io.rest-assured:json-schema-validator:5.3.0'
+
     // Lombok для тестов
     testCompileOnly 'org.projectlombok:lombok:1.18.30'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
