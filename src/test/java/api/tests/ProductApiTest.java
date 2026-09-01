@@ -1,7 +1,6 @@
 package api.tests;
 
 import api.service.ProductServise;
-import com.github.javafaker.Faker;
 import dto.*;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
@@ -9,7 +8,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import testdata.TestDataGenerator;
+import org.junit.jupiter.params.provider.MethodSource;
+import testdata.builders.TestDataGenerator;
 
 
 import java.util.List;
@@ -111,46 +111,68 @@ class ProductApiTest {
         productServise.deleteUser(registerRequest.getEmail());
     }
 
-    @Test
+//    @ParameterizedTest
+//    @Tag("validation")
+//    @CsvSource({
+//            "null, ",
+//            ", null",
+//            "null, null"
+//    })
+//    @DisplayName("API - 006 - POST /api/verifyLogin - авторизация без Email")
+//    void loginWithoutEmailTest(String email, String password) {
+//        RegisterRequestDto registerRequest = TestDataGenerator.generateRegisterRequest();
+//        productServise.register(registerRequest);
+//
+//        String testEmail = "null".equals(email) ? null : registerRequest.getEmail();
+//        String testPassword = "null".equals(password) ? null : registerRequest.getPassword();
+//
+//        LoginRequestDto loginRequest = LoginRequestDto.builder()
+//                .email(testEmail)
+//                .password(testPassword)
+//                .build();
+//        Response response = productServise.login(loginRequest);
+//        LoginResponseDto actual = response.as(LoginResponseDto.class);
+//
+//        LoginResponseDto expected = LoginResponseDto.builder()
+//                .responseCode(404)
+//                .message("User not found!")
+//                .build();
+//
+//        assertThat(response.statusCode()).isEqualTo(200);
+//        assertThat(actual).isEqualTo(expected);
+//    }
+@ParameterizedTest
+@Tag("validation")
+@MethodSource("testdata.builders.LoginWithoutEmailDataProvider#loginWithoutEmailDataProvider")
+@DisplayName("API - 006 - POST /api/verifyLogin - авторизация без Email / без Password")
+void loginWithoutEmailTest(LoginRequestDto loginRequest) {
+    Response response = productServise.login(loginRequest);
+    LoginResponseDto actual = response.as(LoginResponseDto.class);
+
+    LoginResponseDto expected = LoginResponseDto.builder()
+            .responseCode(404)
+            .message("User not found!")
+            .build();
+
+    assertThat(response.statusCode()).isEqualTo(200);
+    assertThat(actual).isEqualTo(expected);
+}
+
+    @ParameterizedTest
     @Tag("validation")
-    @DisplayName("API - 006 - POST /api/verifyLogin - авторизация без Email")
-    void loginWithoutEmailTest() {
-        RegisterRequestDto registerRequest = TestDataGenerator.generateRegisterRequest();
-        productServise.register(registerRequest);
-
-        LoginRequestDto loginRequest = LoginRequestDto.builder()
-                .password(registerRequest.getPassword())
-                .build();
-
+    @MethodSource("testdata.builders.LoginWithoutEmailDataProvider#loginWithoutEmailDataProvider")
+    @DisplayName("API - 007 - POST /api/verifyLogin - авторизация с неверным Email / Password")
+    void loginWithInvalidEmailAndPassTest(LoginRequestDto loginRequest) {
         Response response = productServise.login(loginRequest);
         LoginResponseDto actual = response.as(LoginResponseDto.class);
 
-        assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(actual.getMessage()).contains("User not found");
-
-        productServise.deleteUser(registerRequest.getEmail());
-
-    }
-
-    @Test
-    @Tag("validation")
-    @DisplayName("API - 007 - POST /api/verifyLogin - авторизация с неверным Email и Password")
-    void loginWithInvalidEmailAndPassTest() {
-        RegisterRequestDto registerRequest = TestDataGenerator.generateRegisterRequest();
-        productServise.register(registerRequest);
-
-        Faker faker = new Faker();
-        LoginRequestDto loginRequest = LoginRequestDto.builder()
-                .email(faker.internet().emailAddress())
-                .password(faker.internet().password())
+        LoginResponseDto expected = LoginResponseDto.builder()
+                .responseCode(404)
+                .message("User not found!")
                 .build();
 
-        Response response = productServise.login(loginRequest);
-        LoginResponseDto actual = response.as(LoginResponseDto.class);
-
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(actual.getMessage()).contains("User not found!");
-
+        assertThat(actual).isEqualTo(expected);
     }
 
 

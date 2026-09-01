@@ -1,6 +1,7 @@
-package testdata;
+package testdata.builders;
 
 import com.github.javafaker.Faker;
+import dto.LoginRequestDto;
 import dto.RegisterRequestDto;
 
 public class TestDataGenerator {
@@ -20,6 +21,13 @@ public class TestDataGenerator {
                 .city(faker.address().city())
                 .zipcode(faker.address().zipCode())
                 .mobile_number(faker.phoneNumber().phoneNumber())
+                .build();
+    }
+
+    public static LoginRequestDto generateInvalidLoginRequest() {
+        return LoginRequestDto.builder()
+                .email(faker.internet().emailAddress())
+                .password(faker.internet().password())
                 .build();
     }
 
