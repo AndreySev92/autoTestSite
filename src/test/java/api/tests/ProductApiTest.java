@@ -16,7 +16,6 @@ import java.util.List;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.assertj.core.api.Assertions.assertThat;
-import static testdata.expected.ExpectedResponse.expectedResponseStatus200;
 
 @Tag("api")
 @DisplayName("API тесты для продуктов")
@@ -45,7 +44,7 @@ class ProductApiTest {
 
         Response response = productServise.getBrandsList();
 
-        assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
+        assertThat(response.statusCode()).isEqualTo(200);
         response.then().assertThat()
                 .body(matchesJsonSchemaInClasspath("schemas/brands-schema.json"));
 
@@ -64,7 +63,7 @@ class ProductApiTest {
         List<String> names = products.stream().map(p -> p.getName().toLowerCase()).toList();
         List<String> categories = products.stream().map(p -> p.getCategory().getCategory().toLowerCase()).toList();
 
-        assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
+        assertThat(response.statusCode()).isEqualTo(200);
         assertThat(names).allMatch(name -> name.contains(searchTerm) || categories.get(names.indexOf(name)).contains(searchTerm));
     }
 
@@ -79,7 +78,7 @@ class ProductApiTest {
         Response response = productServise.searchProduct(searchTerm);
         ProductResponseDto productDto = response.as(ProductResponseDto.class);
 
-        assertThat(response.statusCode()).isEqualTo(expectedResponseStatus200);
+        assertThat(response.statusCode()).isEqualTo(200);
         assertThat(productDto.getProducts()).isEmpty();
         response.then().assertThat()
                 .body(matchesJsonSchemaInClasspath("schemas/search-product-empty-schema.json"));
@@ -111,36 +110,7 @@ class ProductApiTest {
         productServise.deleteUser(registerRequest.getEmail());
     }
 
-//    @ParameterizedTest
-//    @Tag("validation")
-//    @CsvSource({
-//            "null, ",
-//            ", null",
-//            "null, null"
-//    })
-//    @DisplayName("API - 006 - POST /api/verifyLogin - авторизация без Email")
-//    void loginWithoutEmailTest(String email, String password) {
-//        RegisterRequestDto registerRequest = TestDataGenerator.generateRegisterRequest();
-//        productServise.register(registerRequest);
-//
-//        String testEmail = "null".equals(email) ? null : registerRequest.getEmail();
-//        String testPassword = "null".equals(password) ? null : registerRequest.getPassword();
-//
-//        LoginRequestDto loginRequest = LoginRequestDto.builder()
-//                .email(testEmail)
-//                .password(testPassword)
-//                .build();
-//        Response response = productServise.login(loginRequest);
-//        LoginResponseDto actual = response.as(LoginResponseDto.class);
-//
-//        LoginResponseDto expected = LoginResponseDto.builder()
-//                .responseCode(404)
-//                .message("User not found!")
-//                .build();
-//
-//        assertThat(response.statusCode()).isEqualTo(200);
-//        assertThat(actual).isEqualTo(expected);
-//    }
+
 @ParameterizedTest
 @Tag("validation")
 @MethodSource("testdata.builders.LoginWithoutEmailDataProvider#loginWithoutEmailDataProvider")
@@ -160,7 +130,7 @@ void loginWithoutEmailTest(LoginRequestDto loginRequest) {
 
     @ParameterizedTest
     @Tag("validation")
-    @MethodSource("testdata.builders.LoginWithoutEmailDataProvider#loginWithoutEmailDataProvider")
+    @MethodSource("testdata.builders.LoginWithInvalidEmailAndPassTest#invalidLoginDataProvider")
     @DisplayName("API - 007 - POST /api/verifyLogin - авторизация с неверным Email / Password")
     void loginWithInvalidEmailAndPassTest(LoginRequestDto loginRequest) {
         Response response = productServise.login(loginRequest);

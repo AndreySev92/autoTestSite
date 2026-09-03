@@ -63,7 +63,7 @@ public class ProductServise extends BaseSpecification {
                 .extract()
                 .response();
     }
-
+    //регистрация пользователя
     public Response register(RegisterRequestDto request) {
         return getBaseSpec()
                 .contentType("application/x-www-form-urlencoded")
@@ -84,19 +84,7 @@ public class ProductServise extends BaseSpecification {
                 .extract()
                 .response();
     }
-
-    public Response signup(SignupRequestDto request) {
-        return getBaseSpec()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("name", request.getName())
-                .formParam("email", request.getEmail())
-                .post("/api/signup")
-                .then()
-                .parser("text/html", Parser.JSON)
-                .extract()
-                .response();
-    }
-
+    //удаление пользователя
     public Response deleteUser(String email) {
         return getBaseSpec()
                 .contentType("application/x-www-form-urlencoded")
@@ -104,41 +92,6 @@ public class ProductServise extends BaseSpecification {
                 .delete(DELETE_USER)
                 .then()
                 .parser("text/html", Parser.JSON)
-                .extract()
-                .response();
-    }
-
-
-    // Добавить продукт в корзину
-    public Response addToCart(int productId) {
-
-        return given()
-                .get(ADD_TO_CART + "/" + productId)
-                ;
-    }
-
-
-    // Удалить продукт из корзины
-    public Response deleteFromCart(int productId) {
-        return getBaseSpec()
-                .baseUri("https://automationexercise.com")
-                .contentType(ContentType.JSON)
-                .accept(ContentType.JSON)
-                .header("Referer", "https://automationexercise.com/")
-                .when()
-                .get(DELETE_CART + "/" + productId)
-                .then()
-                .extract()
-                .response();
-    }
-
-    // Получение информации о пользователе
-    public Response getUserDetail(String email) {
-        return getBaseSpec()
-                .queryParam("email", email)
-                .when()
-                .get(GET_USER_DETAIL)
-                .then()
                 .extract()
                 .response();
     }
