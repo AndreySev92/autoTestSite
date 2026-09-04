@@ -3,25 +3,18 @@ package api.service;
 import config.BaseSpecification;
 import dto.LoginRequestDto;
 import dto.RegisterRequestDto;
-import dto.SignupRequestDto;
-import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
 import io.restassured.response.Response;
 
 
-import static io.restassured.RestAssured.given;
 
 public class ProductServise extends BaseSpecification {
     public static final String PRODUCTS_LIST = "/api/productsList";
     public static final String BRANDS_LIST = "/api/brandsList";
     public static final String SEARCH = "/api/searchProduct";
-    public static final String ADD_TO_CART = "/add_to_cart";
-    public static final String VIEW_CART = "/view_cart";
     public static final String REGISTER = "/api/createAccount";
-    public static final String DELETE_CART = "/delete_cart";
     public static final String DELETE_USER = "/api/deleteAccount";
     public static final String LOGIN = "/api/verifyLogin";
-    private static final String GET_USER_DETAIL = "/getUserDetailByEmail";
 
     // Получить список продуктов
     public Response getProducts(){

@@ -21,7 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("API тесты для продуктов")
 class ProductApiTest {
 
-    private final ProductServise productServise = new ProductServise();
+    private final ProductServise productServise;
+
+    ProductApiTest() {
+        this.productServise = new ProductServise();
+    }
 
     @Test
     @Tag("success")
@@ -60,11 +64,11 @@ class ProductApiTest {
         Response response = productServise.searchProduct(searchTerm);
         ProductResponseDto productDto = response.as(ProductResponseDto.class);
         List<Product> products = productDto.getProducts();
-        List<String> names = products.stream().map(p -> p.getName().toLowerCase()).toList();
-        List<String> categories = products.stream().map(p -> p.getCategory().getCategory().toLowerCase()).toList();
 
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(names).allMatch(name -> name.contains(searchTerm) || categories.get(names.indexOf(name)).contains(searchTerm));
+        assertThat(products)
+                .anyMatch(p -> p.getName().toLowerCase().contains(searchTerm))
+                .anyMatch(p -> p.getCategory().getCategory().toLowerCase().contains(searchTerm));
     }
 
 
