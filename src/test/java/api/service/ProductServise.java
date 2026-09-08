@@ -16,6 +16,7 @@ public class ProductServise extends BaseSpecification {
     public static final String DELETE_USER = "/api/deleteAccount";
     public static final String LOGIN = "/api/verifyLogin";
 
+
     // Получить список продуктов
     public Response getProducts(){
         return getBaseSpec()
