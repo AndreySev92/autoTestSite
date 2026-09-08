@@ -7,6 +7,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import static com.codeborne.selenide.Selenide.$;
+import static ui.test.AutomatSiteTest.SEARCH_STRING;
+
 
 abstract class BaseTest {
 
@@ -15,10 +18,6 @@ abstract class BaseTest {
         Configuration.browser = "chrome";
         Configuration.browserSize = "1920x1080";
         Configuration.pageLoadTimeout = 10000;
-    }
-    @Test
-    public void test(){
-        Selenide.open("https://automationexercise.com/products");
     }
 
     @AfterAll
