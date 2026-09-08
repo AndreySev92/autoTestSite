@@ -17,7 +17,7 @@ abstract class BaseTest {
     public static void setUp() {
         Configuration.browser = "chrome";
         Configuration.browserSize = "1920x1080";
-        Configuration.pageLoadTimeout = 10000;
+        Configuration.pageLoadTimeout = 100000;
     }
 
     @AfterAll

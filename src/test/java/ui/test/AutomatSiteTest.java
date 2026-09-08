@@ -1,10 +1,6 @@
 package ui.test;
 
-import com.codeborne.selenide.Selenide;
 import org.junit.jupiter.api.Test;
-
-import static com.codeborne.selenide.Selenide.$;
-
 
 public class AutomatSiteTest extends BaseTest {
     public static final String SEARCH_STRING = "Madame Top For Women";
@@ -14,9 +10,12 @@ public class AutomatSiteTest extends BaseTest {
 
     @Test
     public void searchTest(){
-        Selenide.open(SEARCH_URL);
-        $("search_product").setValue(SEARCH_STRING);
-        $("submit_search").click();
+        MainPage mainPage = new MainPage(SEARCH_URL);
+
+        mainPage
+                .open()
+                .closeCheckCookies()
+                .search(SEARCH_STRING);
     }
 
 
