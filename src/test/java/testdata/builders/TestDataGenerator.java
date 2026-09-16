@@ -31,6 +31,10 @@ public class TestDataGenerator {
                 .build();
     }
 
-
+    public static String uniqueEmail() {
+        return faker.name().firstName().toLowerCase()
+                + "_" + System.currentTimeMillis()
+                + "@test.com";
+    }
 
 }
