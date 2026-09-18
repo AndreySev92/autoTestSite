@@ -26,6 +26,8 @@ public class MainPage {
     private final SelenideElement subscribeSuccessMsg  = $("#success-subscribe");
     private final SelenideElement womenCategory  = $x("//a[@href='#Women']");
     private final SelenideElement subCategoryDress  = $x("//a[@href='/category_products/1']");
+    private final SelenideElement viewProductCardBlueTop  = $x("//a[@href='/product_details/1']");
+    private final SelenideElement logoutBtn  = $x("//a[@href='/logout']");
 
 
 
@@ -101,5 +103,27 @@ public class MainPage {
         subCategoryDress.shouldBe(visible).click();
         return new CategoryProductDressPage();
     }
+
+    public BlueTopCardPage clickProductCardBlueTop() {
+        viewProductCardBlueTop.shouldBe(visible).click();
+        return new BlueTopCardPage();
+    }
+
+    public MainPage clickLogout() {
+        logoutBtn.shouldBe(visible).click();
+        return this;
+    }
+
+    public MainPage checkUserLoggedOut() {
+        signupLoginBtn.shouldBe(visible);
+        logoutBtn.shouldNotBe(visible);
+        return this;
+    }
+
+    public MainPage checkUserLoggedIn() {
+        logoutBtn.shouldBe(visible);
+        return this;
+    }
+
 
 }

@@ -3,6 +3,8 @@ package ui.test;
 import config.BaseUiSpec;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import pages.CartPage;
 import pages.MainPage;
 import testdata.builders.TestDataGenerator;
@@ -34,7 +36,7 @@ public class AutomatSiteTest extends BaseUiSpec {
     }
 
     @Test
-    @DisplayName("UI-003-Добавление товара в корзину не авторизированный пользователь")
+    @DisplayName("UI-003-Добавление товара в корзину ")
     public void addProductInCartTest() {
 
             // 1. Открываем главную
@@ -56,7 +58,7 @@ public class AutomatSiteTest extends BaseUiSpec {
     }
 
     @Test
-    @DisplayName("UI-004-Удаление товара из корзины не авторизированный пользователь")
+    @DisplayName("UI-004-Удаление товара из корзины")
     public void deleteProductFromCartTest() {
         // 1. Открываем главную
         MainPage mainPage = new MainPage()
@@ -96,7 +98,7 @@ public class AutomatSiteTest extends BaseUiSpec {
 
     @Test
     @DisplayName("UI-006- Выбор товара из категории")
-    public void navigateToDressCategory() {
+    public void navigateToDressCategoryTest() {
         new MainPage()
                 .open()
                 .closeCheckCookies()
@@ -106,4 +108,59 @@ public class AutomatSiteTest extends BaseUiSpec {
                 .checkTitle();
     }
 
-}
+    @Test
+    @DisplayName("UI-007 Просмотр карточки товара Blue Top")
+    public void openBlueTopCardTest() {
+        new MainPage()
+                .open()
+                .closeCheckCookies()
+                .clickProductCardBlueTop()
+                .checkBlueTopPage();
+    }
+
+    @Test
+    @DisplayName("UI-008- Выход из аккаунта")
+    public void logoutTest() {
+        UserData user = UserData.random();
+
+        new MainPage()
+                .open()                             // открыть сайт
+                .closeCheckCookies()                // закрыть cookie-баннер
+                .goToSignupLogin()                 // шаг 1: Signup / Login
+                .signup(user)                      // шаги 3–5: Name, Email, Signup
+                .fillForm(user)                    // шаги 7–8: заполнить форму, Create
+                .checkAccountCreated()             // проверка Account Created!
+                .clickContinue()                    // вернулись на главную, залогинены
+                .checkUserLoggedIn()                // убедились, что "Logout" виден
+                .clickLogout()                      // вышли
+                .checkUserLoggedOut();              // убедились, что "Signup / Login" вернулся
+    }
+
+    @ParameterizedTest(name = "UI-010 Невалидный логин: email=''{0}'', password=''{1}''")
+    @CsvSource({
+            "nonexistent@mail.com, bad123",          // невалидный email + невалидный пароль
+            "nonexistent@mail.com, 123123",          // невалидный email + валидный пароль
+            "TestUser@mail.ru,     bad123"           // валидный email + невалидный пароль
+    })
+    @DisplayName("UI-010 Логин с невалидными данными")
+    public void loginWithInvalidCredentials(String email, String password) {
+        new MainPage()
+                .open()
+                .closeCheckCookies()
+                .goToLogin()                     // возвращает LoginPage
+                .login(email, password)
+                .checkLoginError(ERROR_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("UI-011 Логин с пустыми полями")
+    public void loginWithEmptyFields() {
+        new MainPage()
+                .open()
+                .closeCheckCookies()
+                .goToLogin()
+                .clickLogin();
+
+
+
+    }
