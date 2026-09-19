@@ -4,6 +4,7 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 
+import static ExpectedMessages.ExpectedMessages.LOGIN_ERROR;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import com.codeborne.selenide.Configuration;
@@ -51,9 +52,9 @@ public class MainPage {
         return this;
     }
 
-    public SignupPage goToSignupLogin() {
+    public LoginSignupPage goToSignupLogin() {
         signupLoginBtn.shouldBe(visible).click();
-        return new SignupPage();
+        return new LoginSignupPage();
     }
 
     public AccountDeletedPage deleteAccount() {
@@ -90,7 +91,7 @@ public class MainPage {
     public MainPage checkSubscribeSuccess() {
         subscribeSuccessMsg
                 .shouldBe(visible)
-                .shouldHave(Condition.exactText("You have been successfully subscribed!"));
+                .shouldHave(Condition.exactText(LOGIN_ERROR));
         return this;
     }
 
@@ -125,5 +126,9 @@ public class MainPage {
         return this;
     }
 
+    public LoginSignupPage goToLogin() {
+        signupLoginBtn.shouldBe(visible).click();
+        return new LoginSignupPage();
+    }
 
 }

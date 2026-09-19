@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import pages.CartPage;
 import pages.MainPage;
 import testdata.builders.TestDataGenerator;
@@ -136,20 +137,16 @@ public class AutomatSiteTest extends BaseUiSpec {
                 .checkUserLoggedOut();              // убедились, что "Signup / Login" вернулся
     }
 
-    @ParameterizedTest(name = "UI-010 Невалидный логин: email=''{0}'', password=''{1}''")
-    @CsvSource({
-            "nonexistent@mail.com, bad123",          // невалидный email + невалидный пароль
-            "nonexistent@mail.com, 123123",          // невалидный email + валидный пароль
-            "TestUser@mail.ru,     bad123"           // валидный email + невалидный пароль
-    })
+    @ParameterizedTest
+    @MethodSource("testdata.builders.InvalidLoginCases#cases")
     @DisplayName("UI-010 Логин с невалидными данными")
     public void loginWithInvalidCredentials(String email, String password) {
         new MainPage()
                 .open()
                 .closeCheckCookies()
                 .goToLogin()                     // возвращает LoginPage
-                .login(email, password)
-                .checkLoginError(ERROR_MESSAGE);
+                .login(email,password)
+                .checkLoginError();
     }
 
     @Test
@@ -158,9 +155,9 @@ public class AutomatSiteTest extends BaseUiSpec {
         new MainPage()
                 .open()
                 .closeCheckCookies()
-                .goToLogin()
-                .clickLogin();
+                .goToLogin();
+//                .clickLogin();
 
 
 
-    }
+    }}
