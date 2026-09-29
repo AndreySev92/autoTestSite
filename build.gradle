@@ -73,6 +73,10 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
+    //JDBC
+    implementation 'org.postgresql:postgresql:42.7.4'
+
+
     testImplementation 'com.github.javafaker:javafaker:1.0.2'
 
 }

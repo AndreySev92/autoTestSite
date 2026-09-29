@@ -6,7 +6,6 @@ import ui.dto.UserData;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
-
 public class RegistrationPage {
     private final SelenideElement genderMr     = $("#id_gender1");
     private final SelenideElement password     = $("#password");
@@ -30,14 +29,11 @@ public class RegistrationPage {
     public AccountCreatedPage fillForm(UserData user) {
         genderMr.shouldBe(visible).click();
         password.setValue(user.password());
-
         day.selectOptionByValue(user.day());
         month.selectOptionByValue(user.month());
         year.selectOptionByValue(user.year());
-
         newsletter.click();
         optin.click();
-
         firstName.setValue(user.firstName());
         lastName.setValue(user.lastName());
         company.setValue(user.company());
@@ -48,9 +44,7 @@ public class RegistrationPage {
         city.setValue(user.city());
         zipcode.setValue(user.zipcode());
         mobile.setValue(user.phone());
-
         createButton.click();
         return new AccountCreatedPage();
     }
-
 }

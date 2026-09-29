@@ -4,12 +4,13 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 
-import static ExpectedMessages.ExpectedMessages.LOGIN_ERROR;
+import static testdata.builders.ExpectedMessages.LOGIN_ERROR;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import com.codeborne.selenide.Configuration;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$x;
+import static testdata.builders.ExpectedMessages.SUBSCRIBE_SUCCESS;
 
 public class MainPage {
     private final SelenideElement searchInput      = $("#search_product");
@@ -29,9 +30,6 @@ public class MainPage {
     private final SelenideElement subCategoryDress  = $x("//a[@href='/category_products/1']");
     private final SelenideElement viewProductCardBlueTop  = $x("//a[@href='/product_details/1']");
     private final SelenideElement logoutBtn  = $x("//a[@href='/logout']");
-
-
-
 
     public MainPage open() {
         Selenide.open(Configuration.baseUrl);
@@ -91,7 +89,7 @@ public class MainPage {
     public MainPage checkSubscribeSuccess() {
         subscribeSuccessMsg
                 .shouldBe(visible)
-                .shouldHave(Condition.exactText(LOGIN_ERROR));
+                .shouldHave(Condition.exactText(SUBSCRIBE_SUCCESS));
         return this;
     }
 
@@ -130,5 +128,4 @@ public class MainPage {
         signupLoginBtn.shouldBe(visible).click();
         return new LoginSignupPage();
     }
-
 }

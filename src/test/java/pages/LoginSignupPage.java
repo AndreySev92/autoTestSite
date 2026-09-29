@@ -3,10 +3,11 @@ package pages;
 import com.codeborne.selenide.SelenideElement;
 import ui.dto.UserData;
 
-import static ExpectedMessages.ExpectedMessages.LOGIN_ERROR;
+import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.WebDriverConditions.urlContaining;
+import static testdata.builders.ExpectedMessages.LOGIN_ERROR;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selenide.$;
 
 
 public class LoginSignupPage {
@@ -16,9 +17,7 @@ public class LoginSignupPage {
     private final SelenideElement loginEmail = $("[data-qa='login-email']");
     private final SelenideElement loginPass = $("[data-qa='login-password']");
     private final SelenideElement loginBtn = $("[data-qa='login-button']");
-    private final SelenideElement loginError = $("p:contains('Your email or password is incorrect!')");
-
-
+    private final SelenideElement loginError = $x("//p[text()='" + LOGIN_ERROR + "']");
     public RegistrationPage signup(UserData user) {
         signupName.shouldBe(visible).setValue(user.name());
         signupEmail.shouldBe(visible).setValue(user.email());
@@ -38,5 +37,8 @@ public class LoginSignupPage {
         return this;
     }
 
-
+    public LoginSignupPage checkStayedOnLoginPage() {
+        webdriver().shouldHave(urlContaining("/login"));
+        return this;
+    }
 }
