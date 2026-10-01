@@ -1,7 +1,9 @@
 package db.test;
 
+import db.config.DbInitializer;
 import db.dao.UserDao;
 import db.model.User;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import testdata.builders.TestDataGenerator;
@@ -13,6 +15,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DbCrudTest {
 
     private final UserDao userDao = new UserDao();
+
+    @BeforeAll
+    static void initSchema() throws SQLException {
+        DbInitializer.init();
+    }
 
     @Test
     @DisplayName("CRUD: создание → чтение → обновление → удаление")

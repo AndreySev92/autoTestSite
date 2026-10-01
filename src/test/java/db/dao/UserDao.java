@@ -53,26 +53,6 @@ public class UserDao {
         }
     }
 
-    public List<User> findAll() throws SQLException {
-        String sql = "SELECT id, name, email, password FROM users ORDER BY id";
-        List<User> users = new ArrayList<>();
-
-        try (Connection conn = DbConnection.get();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                users.add(new User(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("email"),
-                        rs.getString("password")
-                ));
-            }
-        }
-        return users;
-    }
-
     public boolean update(User user) throws SQLException {
         String sql = "UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?";
 
