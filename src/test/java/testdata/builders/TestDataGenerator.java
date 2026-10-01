@@ -36,4 +36,12 @@ public class TestDataGenerator {
                 + "_" + System.currentTimeMillis()
                 + "@test.com";
     }
+
+    public static String password() {
+        return faker.internet().password(8, 16, true, true, true);
+    }
+
+    public static String name() {
+        return faker.name().firstName();
+    }
 }
