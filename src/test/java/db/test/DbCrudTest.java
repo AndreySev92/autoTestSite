@@ -1,50 +1,94 @@
 package db.test;
 
-import db.config.DbInitializer;
+import config.BaseDbSpec;
 import db.dao.UserDao;
 import db.model.User;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import testdata.builders.ExpectedMessages;
 import testdata.builders.TestDataGenerator;
 
 import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-public class DbCrudTest {
+@Tag("db")
+@DisplayName("CRUD тесты для UserDao")
+public class DbCrudTest extends BaseDbSpec {
 
-    private final UserDao userDao = new UserDao();
+    @Test
+    @Tag("success")
+    @DisplayName("CREATE: пользователь создаётся в БД")
+    void shouldCreateUser() throws SQLException {
+        User user = User.of(
+                TestDataGenerator.name(),
+                TestDataGenerator.uniqueEmail(),
+                TestDataGenerator.password()
+        );
 
-    @BeforeAll
-    static void initSchema() throws SQLException {
-        DbInitializer.init();
+        int id = userDao.create(user);
+
+        User created = userDao.findByEmail(user.email());
+        assertThat(created).isNotNull();
+        assertThat(created.id()).isEqualTo(id);
+        assertThat(created.name()).isEqualTo(user.name());
     }
 
     @Test
-    @DisplayName("CRUD: создание → чтение → обновление → удаление")
-    public void fullCrudFlow() throws SQLException {
-        String email = TestDataGenerator.uniqueEmail();
-        String password = TestDataGenerator.password();
-        String name = TestDataGenerator.name();
-        User newUser = User.of(name, email, password);
+    @Tag("validation")
+    @DisplayName("CREATE: не создаётся пользователь с дублирующимся email")
+    void shouldNotCreateDuplicateEmail() throws SQLException {
+        User first = givenUserInDb();
 
-        int id = userDao.create(newUser);
-        assertThat(id).isPositive();
+        User duplicate = User.of(
+                TestDataGenerator.name(),
+                first.email(),
+                TestDataGenerator.password()
+        );
 
-        User found = userDao.findByEmail(email);
-        assertThat(found).isNotNull();
-        assertThat(found.name()).isEqualTo(name);
-        assertThat(found.email()).isEqualTo(email);
-
-        String newName = TestDataGenerator.name();
-        User updated = new User(found.id(), newName, found.email(), found.password());
-        assertThat(userDao.update(updated)).isTrue();
-
-        User afterUpdate = userDao.findByEmail(email);
-        assertThat(afterUpdate.name()).isEqualTo(newName);
-
-        assertThat(userDao.delete(id)).isTrue();
-        assertThat(userDao.findByEmail(email)).isNull();
+        assertThatThrownBy(() -> userDao.create(duplicate))
+                .isInstanceOf(SQLException.class)
+                .hasMessageContaining(ExpectedMessages.UNIQUE_EMAIL_VIOLATION);
     }
+
+    @Test
+    @Tag("success")
+    @DisplayName("READ: findByEmail возвращает созданного пользователя")
+    void shouldFindUserByEmail() throws SQLException {
+        User user = givenUserInDb();
+
+        User found = userDao.findByEmail(user.email());
+
+        assertThat(found).isNotNull();
+        assertThat(found.email()).isEqualTo(user.email());
+    }
+
+    @Test
+    @Tag("success")
+    @DisplayName("UPDATE: имя пользователя обновляется")
+    void shouldUpdateUser() throws SQLException {
+        User user = givenUserInDb();
+        String newName = TestDataGenerator.name();
+        User updated = new User(user.id(), newName, user.email(), user.password());
+
+        boolean result = userDao.update(updated);
+
+        assertThat(result).isTrue();
+        assertThat(userDao.findByEmail(user.email()).name()).isEqualTo(newName);
+    }
+
+    @Test
+    @Tag("success")
+    @DisplayName("DELETE: пользователь удаляется из БД")
+    void shouldDeleteUser() throws SQLException {
+        User user = givenUserInDb();
+
+        boolean result = userDao.delete(user.id());
+
+        assertThat(result).isTrue();
+        assertThat(userDao.findByEmail(user.email())).isNull();
+    }
+
 }

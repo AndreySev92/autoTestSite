@@ -1,7 +1,7 @@
 package db.model;
 
 public record User(
-        int id,
+        Integer id,
         String name,
         String email,
         String password
