@@ -4,16 +4,19 @@ import db.config.DbInitializer;
 import db.dao.UserDao;
 import db.model.User;
 import org.junit.jupiter.api.BeforeAll;
-import testdata.builders.TestDataGenerator;
+import testdata.builders.UserDataBuilder;
 
 import java.sql.SQLException;
 
 public abstract class BaseDbSpec {
 
     protected final UserDao userDao;
+    protected final UserDataBuilder userDataBuilder;
+
 
     public BaseDbSpec() {
         this.userDao = new UserDao();
+        this.userDataBuilder = new UserDataBuilder(this.userDao);
     }
 
     @BeforeAll
@@ -22,12 +25,7 @@ public abstract class BaseDbSpec {
     }
 
     protected User givenUserInDb() throws SQLException {
-        User user = User.of(
-                TestDataGenerator.name(),
-                TestDataGenerator.uniqueEmail(),
-                TestDataGenerator.password()
-        );
-        int id = userDao.create(user);
-        return new User(id, user.name(), user.email(), user.password());
+        return userDataBuilder.givenUserInDb();
     }
+
 }

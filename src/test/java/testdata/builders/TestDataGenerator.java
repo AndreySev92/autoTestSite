@@ -44,4 +44,8 @@ public class TestDataGenerator {
     public static String name() {
         return faker.name().firstName();
     }
+
+    public static String unknownEmail() {
+        return faker.internet().emailAddress();
+    }
 }

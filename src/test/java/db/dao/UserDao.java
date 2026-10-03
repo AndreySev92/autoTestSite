@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDao {
 
@@ -75,5 +77,26 @@ public class UserDao {
             stmt.setInt(1, id);
             return stmt.executeUpdate() > 0;
         }
+    }
+
+    public List<User> findAll() throws SQLException {
+        String sql = "SELECT id, name, email, password FROM users ORDER BY id";
+        List<User> users = new ArrayList<>();
+
+        try (Connection conn = DbConnection.get();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                users.add(new User(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("password")
+
+                ));
+            }
+        }
+        return users;
     }
 }
