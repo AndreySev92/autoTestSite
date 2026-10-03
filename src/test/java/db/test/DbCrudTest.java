@@ -17,6 +17,7 @@ import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static testdata.builders.ExpectedMessages.NULL_IN_VALUE;
 
 @Tag("db")
 @DisplayName("CRUD тесты для UserDao")
@@ -44,9 +45,9 @@ public class DbCrudTest extends BaseDbSpec {
                 .isEqualTo(user);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "SQL-инъекция: email=''{0}''")
     @MethodSource("testdata.builders.SecurityTestData#sqlInjectionEmails")
-    @Tag("validation")
+    @Tag("security")
     @DisplayName("CREATE: SQL инъекция через Email безопасна")
     void shouldNotSqlInjection(String injectionEmail) throws SQLException {
         User user = userDataBuilder.userWithEmail(injectionEmail);
@@ -76,16 +77,18 @@ public class DbCrudTest extends BaseDbSpec {
                 .hasMessageContaining(ExpectedMessages.UNIQUE_EMAIL_VIOLATION);
     }
 
-    @Test
-    @Tag("success")
-    @DisplayName("READ: findByEmail возвращает созданного пользователя")
-    void shouldFindUserByEmail() throws SQLException {
-        User user = givenUserInDb();
+    @ParameterizedTest(name = "CREATE: не создаётся пользователь с {0}")
+    @MethodSource("testdata.builders.CheckNullWithCreate#userWithNullNameAndEmail")
+    @Tag("validation")
+    @DisplayName("CREATE: не создаётся пользователь с null в обязательном поле")
+    void sholdNotCreateWithNullName(User user){
 
-        User found = userDao.findByEmail(user.email());
+        assertThatThrownBy(() -> userDao.create(user))
+                .isInstanceOf(SQLException.class)
+                .hasMessageContaining(NULL_IN_VALUE);
 
-        assertThat(found).isEqualTo(user);
     }
+
 
     @Test
     @Tag("success")

@@ -48,4 +48,13 @@ public class TestDataGenerator {
     public static String unknownEmail() {
         return faker.internet().emailAddress();
     }
+
+    public static String randomNameLength(int length) {
+        return faker.lorem().characters(length);
+    }
+
+    public static String randomEmailLength(int length) {
+        return faker.lorem().characters(length) + "@test.ru";
+    }
+
 }
